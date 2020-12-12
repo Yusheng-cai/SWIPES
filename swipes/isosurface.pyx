@@ -1,6 +1,6 @@
 import MDAnalysis as mda
 import numpy as np
-from scipy.special import cKDTree
+from scipy.spatial import cKDTree
 
 class isosurface:
     def __init__(self,pos,box,ngrids,sigma=2.4):
@@ -12,6 +12,7 @@ class isosurface:
         sigma: the sigma used for coarse graining of density field
         """
         self.pos = pos
+        self.box = box
         self.Lx,self.Ly,self.Lz = box
         self.nx,self.ny,self.nz = ngrids
         self.sigma = sigma
@@ -23,7 +24,7 @@ class isosurface:
         Z = np.linspace(0,self.Lz,num=self.nz,endpoint=False)
         
         xx,yy,zz = np.meshgrid(X,Y,Z) # each of xx,yy,zz are of shape (Ni,Ni,Ni)
-        self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten()))
+        self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
         self.tree = cKDTree(self.grids,boxsize=self.box)
     
     def coarse_grain(self,dr,sigma):
@@ -38,7 +39,7 @@ class isosurface:
         if isinstance(dr,np.ndarray):
             if dr.ndim >= 2:
                 d = dr.shape[-1]
-                sum_ = (dr**2).sum(asigmas=-1)
+                sum_ = (dr**2).sum(axis=-1)
             if dr.ndim == 1:
                 d = dr.shape[0]
                 sum_ = (dr**2).sum()
@@ -65,7 +66,7 @@ class isosurface:
         box = self.box
         grids = self.grids
 
-        self.idx = tree.query(pos,sigma*n)  
+        self.idx = tree.query_ball_point(pos,sigma*n)  
         self.field = np.zeros((self.nx*self.ny*self.nz,))
 
         ix = 0
