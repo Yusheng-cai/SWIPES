@@ -12,7 +12,6 @@ class isosurface:
         sigma: the sigma used for coarse graining of density field
         """
         self.pos = pos
-        self.grids = grids
         self.Lx,self.Ly,self.Lz = box
         self.nx,self.ny,self.nz = ngrids
         self.sigma = sigma
@@ -25,7 +24,7 @@ class isosurface:
         
         xx,yy,zz = np.meshgrid(X,Y,Z) # each of xx,yy,zz are of shape (Ni,Ni,Ni)
         self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten()))
-        self.tree = cKDTree(self.grids,boxsize=box)
+        self.tree = cKDTree(self.grids,boxsize=self.box)
     
     def coarse_grain(self,dr,sigma):
         """
@@ -64,12 +63,13 @@ class isosurface:
         sigma = self.sigma
         tree = self.tree
         box = self.box
+        grids = self.grids
 
         self.idx = tree.query(pos,sigma*n)  
         self.field = np.zeros((self.nx*self.ny*self.nz,))
 
         ix = 0
-        for index in idx:
+        for index in self.idx:
             dr = abs(pos[ix] - grids[index])
             # check pbc
             cond = dr > box/2
