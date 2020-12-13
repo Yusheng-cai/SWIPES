@@ -3,7 +3,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 class isosurface:
-    def __init__(self,pos,box,ngrids,sigma=2.4):
+    def __init__(self,box,ngrids,sigma=2.4):
         """
         pos: position of the atoms/virtual atoms(COM) in the desired probe volume (N,3),
              these are already normalized where pox[x,y,z] all lie respectively in [0,Lx),[0,Ly),[0,Lz)
@@ -11,7 +11,6 @@ class isosurface:
         spacings: a tuple of (dx,dy,dz)
         sigma: the sigma used for coarse graining of density field
         """
-        self.pos = pos
         self.box = box
         self.Lx,self.Ly,self.Lz = box
         self.nx,self.ny,self.nz = ngrids
@@ -50,7 +49,7 @@ class isosurface:
 
         return (2*np.pi*sigma**2)**(-d/2)*np.exp(-sum_/(2*sigma**2))
 
-    def field_density(self,n=2.5,ignore_d=None):
+    def field_density(self,pos,n=2.5,ignore_d=None):
         """
         This is not a exact way to find the density field, but cut off the density gaussian at 
         n*sigma 
@@ -61,7 +60,6 @@ class isosurface:
         returns:
             the field density 
         """
-        pos = self.pos
         sigma = self.sigma
         tree = self.tree
         box = self.box
