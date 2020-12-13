@@ -56,6 +56,7 @@ class isosurface:
         n*sigma 
 
         n: the n in the cutoff n*sigma that we want to approximate the density field by
+        ignore_d: the dimension to be ignored in pbc calculation, a numpy array with shape (3,)
 
         returns:
             the field density 
@@ -66,7 +67,7 @@ class isosurface:
         box = self.box
         grids = self.grids
         if ignore_d != None:
-            d = ignore_d-1
+            d = ignore_d
 
         self.idx = tree.query_ball_point(pos,sigma*n)  
         self.field = np.zeros((self.nx*self.ny*self.nz,))
@@ -77,7 +78,7 @@ class isosurface:
             # check pbc
             cond = dr > box/2
             if ignore_d != None:
-                cond[:,d] = 0
+                cond = cond*d
 
             # correct pbc
             dr = abs(cond*box - dr)
