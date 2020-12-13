@@ -66,8 +66,10 @@ class isosurface:
         tree = self.tree
         box = self.box
         grids = self.grids
-        if ignore_d != None:
+        ignore_d_flag = False
+        if isinstance(ignore_d,np.ndarray):
             d = ignore_d
+            ignore_d_flag = True
 
         self.idx = tree.query_ball_point(pos,sigma*n)  
         self.field = np.zeros((self.nx*self.ny*self.nz,))
@@ -76,8 +78,8 @@ class isosurface:
         for index in self.idx:
             dr = abs(pos[ix] - grids[index])
             # check pbc
-            cond = dr > box/2
-            if ignore_d != None:
+            cond = 1*(dr > box/2)
+            if ignore_d_flag:
                 cond = cond*d
 
             # correct pbc
