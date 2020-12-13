@@ -50,7 +50,7 @@ class isosurface:
 
         return (2*np.pi*sigma**2)**(-d/2)*np.exp(-sum_/(2*sigma**2))
 
-    def field_density(self,n=2.5):
+    def field_density(self,n=2.5,ignore_d=None):
         """
         This is not a exact way to find the density field, but cut off the density gaussian at 
         n*sigma 
@@ -65,6 +65,8 @@ class isosurface:
         tree = self.tree
         box = self.box
         grids = self.grids
+        if ignore_d != None:
+            d = ignore_d-1
 
         self.idx = tree.query_ball_point(pos,sigma*n)  
         self.field = np.zeros((self.nx*self.ny*self.nz,))
@@ -74,6 +76,8 @@ class isosurface:
             dr = abs(pos[ix] - grids[index])
             # check pbc
             cond = dr > box/2
+            if ignore_d != None:
+                cond[:,d] = 0
 
             # correct pbc
             dr = abs(cond*box - dr)
