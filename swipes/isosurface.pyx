@@ -101,12 +101,12 @@ class isosurface:
         output: 
                 the indices for all triangles (N,3,3) where N=number of triangles
         """
-        if self.field == None:
+        if self.field is None:
             raise RuntimeError("Please run iso.field_density first!")
 
-        Nx,Ny,Nz = self.Nx,self.Ny,self.Nz
+        Nx,Ny,Nz = self.nx,self.ny,self.nz
         Lx,Ly,Lz = self.Lx,self.Ly,self.Lz
-        dx,dy,dz = self.Lx/self.Nx,self.Ly/self.Ny,self.Nz/self.Lz
+        dx,dy,dz = Lx/Nx,Ly/Ny,Lz/Nz
 
         field = self.field
         data = field.reshape(Nx,Ny,Nz)
