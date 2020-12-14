@@ -1,6 +1,7 @@
 import MDAnalysis as mda
 import numpy as np
 from scipy.spatial import cKDTree
+from skimage import measure
 
 class isosurface:
     def __init__(self,box,ngrids,sigma=2.4):
@@ -15,6 +16,7 @@ class isosurface:
         self.Lx,self.Ly,self.Lz = box
         self.nx,self.ny,self.nz = ngrids
         self.sigma = sigma
+        self.field = None
         self.initialize()
 
     def initialize(self):
@@ -88,3 +90,26 @@ class isosurface:
             ix += 1
 
         return self.field
+
+    def marching_cubes(self,c=0.016,gradient_direction='descent'):
+        """
+        Output triangles needed for graphing isosurface 
+        c: the contour line value for the isosurface
+        gradient_direction: 'descent' if the values exterior of the object are smaller,
+                            'ascent' if the values exterior of the object are bigger
+        
+        output: 
+                the indices for all triangles (N,3,3) where N=number of triangles
+        """
+        if self.field == None:
+            raise RuntimeError("Please run iso.field_density first!")
+
+        Nx,Ny,Nz = self.Nx,self.Ny,self.Nz
+        Lx,Ly,Lz = self.Lx,self.Ly,self.Lz
+        dx,dy,dz = self.Lx/self.Nx,self.Ly/self.Ny,self.Nz/self.Lz
+
+        field = self.field
+        data = field.reshape(Nx,Ny,Nz)
+        verts,faces,_,_ = measure.marching_cubes_lewiner(data,c,spacing=(dx,dy,dz))
+
+        return verts[faces]
