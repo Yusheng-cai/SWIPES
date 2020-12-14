@@ -23,6 +23,8 @@ class isosurface:
         Z = np.linspace(0,self.Lz,num=self.nz,endpoint=False)
         
         xx,yy,zz = np.meshgrid(X,Y,Z) # each of xx,yy,zz are of shape (Ni,Ni,Ni)
+        xx = np.moveaxis(xx,0,-1)
+        yy = np.moveaxis(yy,1,0)
         self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
         self.tree = cKDTree(self.grids,boxsize=self.box)
     
