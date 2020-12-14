@@ -3,3 +3,5 @@ dist/
 *.egg-info/
 */*.so
 */*.c
+swipes/lib/*.c
+swipes/lib/*.so
