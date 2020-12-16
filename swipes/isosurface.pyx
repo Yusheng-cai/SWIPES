@@ -66,7 +66,8 @@ class isosurface:
     def field_density_kdtree(self,pos,n=2.5,keep_d=None):
         """
         This is not a exact way to find the density field, but cut off the density gaussian at 
-        n*sigma 
+        n*sigma. The meshgrid points within the radius are found using kdtree, building of the 
+        tree is M log(M) and searching takes log(M). 
 
         n: the n in the cutoff n*sigma that we want to approximate the density field by
         keep_d: the dimension to be ignored in pbc calculation, a numpy array with shape (3,)
@@ -101,7 +102,9 @@ class isosurface:
             self.field[index] += self.coarse_grain(dr,sigma)
             ix += 1
 
-        return self.field.reshape(Nx,Ny,Nz)
+        self.field = self.field.reshape(Nx,Ny,Nz)
+
+        return self.field
 
     def field_density_cube(self,pos,n=2.5,keep_d=None):
         """
@@ -174,7 +177,7 @@ class isosurface:
             self.field[idx[:,0],idx[:,1],idx[:,2]] += self.coarse_grain(dr,sigma)
 
         return self.field
-            
+     
     def marching_cubes(self,c=0.016,gradient_direction='descent',field=None):
         """
         Output triangles needed for graphing isosurface 
@@ -187,6 +190,7 @@ class isosurface:
         """
         if self.field is None and field is None:
             raise RuntimeError("Please run iso.field_density first or pass in a field!")
+
         if field is not None:
             field=field
         else:
@@ -199,4 +203,4 @@ class isosurface:
 
         verts,faces,_,_ = measure.marching_cubes_lewiner(field,c,spacing=(dx,dy,dz))
 
-        return verts[faces]
+        return verts[faces] 
