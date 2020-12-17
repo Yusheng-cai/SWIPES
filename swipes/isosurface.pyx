@@ -4,7 +4,7 @@ from scipy.spatial import cKDTree
 from skimage import measure
 
 class isosurface:
-    def __init__(self,box,ngrids,sigma=2.4,kdTree=True):
+    def __init__(self,box,ngrids,sigma=2.4,kdTree=True,field=None):
         """
         pos: position of the atoms/virtual atoms(COM) in the desired probe volume (N,3),
              these are already normalized where pox[x,y,z] all lie respectively in [0,Lx),[0,Ly),[0,Lz)
@@ -23,8 +23,11 @@ class isosurface:
 
         self.sigma = sigma
 
-        # set the initial field to None
-        self.field = None
+        # User can pass in a field or else it will be None
+        if field is not None:
+            print("You have passed in a density field!")
+        self.field = field
+
         self.initialize(kdTree)
 
     def initialize(self,kdTree=True):
@@ -38,7 +41,9 @@ class isosurface:
         self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
         if kdTree:
             self.tree = cKDTree(self.grids,boxsize=self.box)
-            print("Using KDTree algorithm")
+            print("KDtree built, now isosurface.field_density_kdtree can be used.")
+        else:
+            self.tree = None
     
     def coarse_grain(self,dr,sigma):
         """
@@ -75,8 +80,15 @@ class isosurface:
         returns:
             the field density 
         """
+        if self.field is not None:
+            print("The field that was passed in will now be overwritten")
         sigma = self.sigma
-        tree = self.tree
+
+        if self.tree is None:
+            raise RuntimeError("Please set kdTree=True in initialization, tree has not been built")
+        else:
+            tree = self.tree
+
         box = self.box
         grids = self.grids
         keep_d_flag = False
@@ -124,6 +136,9 @@ class isosurface:
         returns: 
                 a field of shape (Nx,Ny,Nz) from ngrids
         """
+        if self.field is not None:
+            print("The field that was passed in will now be overwritten")
+
         dbox = self.dbox
         ngrids = self.ngrids
         box = self.box
