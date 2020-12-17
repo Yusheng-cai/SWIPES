@@ -193,10 +193,56 @@ class isosurface:
 
         return self.field
 
+    def surface1d(self,field1d=None,grids1d=None,c=0.016):
+        """
+        Function that calculates the points to plot a 1d surface
+
+        field1d: the x field usually (Nx,), if None, then will be calculated from self.field by integrating
+        out y and z dependence
+        grids1d: the x grids usually (Nx,), if None, then will generate grids based on self.Nx and self.Lx
+        c: where the isosurface lie
+
+        returns:
+           The point where the surface cross 0.016 
+        """
+        if field1d is None and self.field is None:
+            raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
+
+        if field1d is not None:
+            field = field1d
+        else:
+            field = (self.field.sum(axis=-1)/self.nz).sum(axis=-1)/self.ny # (Nx,)
+
+        if grids1d is None:
+            grids = np.linspace(0,self.Lx,self.nx)
+        else:
+            grids = grids1d
+
+        if len(field.shape) != 1:
+            raise RuntimeError("Please provide a 1d field in the shape of (Nx,)!")
+      
+        pfield = field[0]
+        pgrid = grids[0]
+        for i in range(1,field.shape[0]):
+            cfield = field[i]
+            cgrid = grids[i]
+
+            cond1 = pfield >= c
+            cond2 = cfield <= c
+            cond = cond1*cond2
+
+            if cond != 0:
+                ratio = (c - pfield)/(cfield-pfield) 
+                x = pgrid + ratio*(cgrid-pgrid)
+
+            pfield = cfield
+            pgrid = cgrid
+        return x
+
     def surface2d(self,field2d=None,grids2d=None,c=0.016):
         """
         Function that calculates the points to plot a 2d surface
-        fields2d: the x & z field usually, if None, then will use self.field
+        fields2d: the x & z field usually (Nx,Nz), if None, then will use self.field
         grids2d: the x & z grids usually, if None, then will generate grids
         c: where the isosurface lie
 
@@ -269,10 +315,8 @@ class isosurface:
 
         return np.concatenate(points_all)
 
-
-
-     
-    def marching_cubes(self,c=0.016,gradient_direction='descent',field=None):
+ 
+    def surface3d(self,c=0.016,gradient_direction='descent',field=None):
         """
         Output triangles needed for graphing isosurface 
         c: the contour line value for the isosurface
