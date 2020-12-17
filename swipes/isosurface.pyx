@@ -177,6 +177,85 @@ class isosurface:
             self.field[idx[:,0],idx[:,1],idx[:,2]] += self.coarse_grain(dr,sigma)
 
         return self.field
+
+    def surface2d(self,field2d=None,grids2d=None,c=0.016):
+        """
+        Function that calculates the points to plot a 2d surface
+        fields2d: the x & z field usually, if None, then will use self.field
+        grids2d: the x & z grids usually, if None, then will generate grids
+        c: where the isosurface lie
+
+        returns:    
+            a list of points that lies on the 2d isosurface
+        """
+        if field2d is None and self.field is None:
+            raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
+
+        if field2d is not None:
+            field = field2d
+        else:
+            field = self.field.sum(axis=1)/self.ny # (Nx,Ny)
+
+        if grids2d is None:
+            x = np.linspace(0,self.Lx,self.nx)
+            z = np.linspace(0,self.Lz,self.nz)
+
+            xx,zz = np.meshgrid(x,z)
+            xx = np.moveaxis(xx,0,-1)
+            zz = np.moveaxis(zz,0,-1)
+            grids = np.concatenate((xx[:,:,np.newaxis],zz[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
+        else:
+            grids = grids2d
+
+        if len(field.shape) != 2:
+            raise RuntimeError("Please provide a 2d field in the shape of (Nx,Nz)!")
+
+        Nx,Nz = field.shape
+        # define "previous field" as in all the field that has the same x coordinate (in this case x=0)
+        pfield = field[0]
+        # define "previous grids" as in all the grids that has the same x coordinate (in this case x=0)
+        pgrids = grids[0]
+        points_all = []
+
+        for i in range(1,Nx):
+            # define "current field/grids" as in the current grid/field we are looking at that share the same x coordinate
+            cfield = field[i] # (nz, )
+            cgrids = grids[i] # (nz,2)
+            
+            # first condition is the previous x (field) needs to be larger than c
+            cond1 = pfield >= c
+            # second condition is the current x (field) needs to be smaller than c
+            cond2 = cfield <= c
+            # both have to be true in order to be identified to be at the boundary
+            cond = cond1*cond2
+            # find the indices of the points that satisfy both conditions
+            idx = np.argwhere(cond == 1)
+            
+            # See if idx is empty (only perform when it is not)
+            if idx.size:
+                # find where c lies between the current field and previous field
+                ratio = (c-pfield[idx])/(cfield[idx]-pfield[idx])
+
+                # find current x and previous x
+                x_prev = pgrids[idx,0]
+                x_curr = cgrids[idx,0]
+
+                z_points = grids[i,idx,1]
+                # interpolate the x values on the boundary by the field values
+                x_points = x_prev + (x_curr - x_prev)*ratio
+
+                # stack the x and z values to form the 2d isosurface
+                points = np.vstack((x_points.flatten(),z_points.flatten())).T
+                points_all.append(points)
+            
+            # update "previous" field/grids
+            pfield = cfield
+            pgrids = cgrids
+
+        return np.concatenate(points_all)
+
+
+
      
     def marching_cubes(self,c=0.016,gradient_direction='descent',field=None):
         """
