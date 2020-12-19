@@ -119,7 +119,7 @@ class isosurface:
 
         return self.field
 
-    def field_density_cube(self,pos,n=2.5,keep_d=None):
+    def field_density_cube(self,pos,n=2.5,keep_d=None,verbose=False):
         """
         Find all the distances in a cube, this method doesn't use any search method but rather indexing into self.grids array
         For every atom, it first finds the nearest index to the atom by simply perform floor(x/dx,y/dy,z/dz). Once the nearest
@@ -138,7 +138,8 @@ class isosurface:
                 a field of shape (Nx,Ny,Nz) from ngrids
         """
         if self.field is not None:
-            print("The field that was passed in will now be overwritten")
+            if verbose:
+                print("The field that was passed or was just calculated in will now be overwritten")
 
         dbox = self.dbox
         ngrids = self.ngrids
@@ -167,6 +168,8 @@ class isosurface:
             num = indices[-1]*Nx*Ny+indices[1]*Nx+indices[0]
             if num in self.dict:
                 idx = self.dict[num]
+                if verbose:
+                    print("dict used")
             else:
                 back = indices - nidx_search
                 forward = indices + nidx_search
