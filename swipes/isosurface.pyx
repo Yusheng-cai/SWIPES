@@ -27,6 +27,7 @@ class isosurface:
         if field is not None:
             print("You have passed in a density field!")
         self.field = field
+        self.dict = {}
 
         self.initialize(kdTree)
 
@@ -162,22 +163,26 @@ class isosurface:
             keep_d_flag = True
 
         for p in pos: 
-            indices = np.ceil(p/dbox)
+            indices = np.ceil(p/dbox)    
+            num = indices[-1]*Nx*Ny+indices[1]*Nx+indices[0]
+            if num in self.dict:
+                idx = self.dict[num]
+            else:
+                back = indices - nidx_search
+                forward = indices + nidx_search
 
-            back = indices - nidx_search
-            forward = indices + nidx_search
+                x = np.r_[int(back[0]):int(forward[0])+1]
+                y = np.r_[int(back[1]):int(forward[1])+1]
+                z = np.r_[int(back[2]):int(forward[2])+1]
 
-            x = np.r_[int(back[0]):int(forward[0])+1]
-            y = np.r_[int(back[1]):int(forward[1])+1]
-            z = np.r_[int(back[2]):int(forward[2])+1]
+                xx,yy,zz = np.meshgrid(x,y,z)
+                idx = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
+                left_PBC_cond = 1*(idx < 0)
+                right_PBC_cond = 1*(idx > ngrids-1)
 
-            xx,yy,zz = np.meshgrid(x,y,z)
-            idx = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
-            left_PBC_cond = 1*(idx < 0)
-            right_PBC_cond = 1*(idx > ngrids-1)
-
-            idx += left_PBC_cond*ngrids
-            idx -= right_PBC_cond*ngrids
+                idx += left_PBC_cond*ngrids
+                idx -= right_PBC_cond*ngrids
+                self.dict[num] = idx
 
             dr = abs(p - grids[idx[:,0],idx[:,1],idx[:,2]])
 
