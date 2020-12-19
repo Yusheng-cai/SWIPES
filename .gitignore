@@ -5,3 +5,5 @@ dist/
 */*.c
 swipes/lib/*.c
 swipes/lib/*.so
+__pyache__/
+*.npz
