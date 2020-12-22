@@ -7,5 +7,5 @@ swipes/lib/*.c
 swipes/lib/*.so
 __pyache__/
 *.npz
-swipes/__pyache__/
-swipes/lib/__pyache__/
+swipes/__pycache__/
+swipes/lib/__pycache__/
