@@ -1,9 +1,11 @@
-import MDAnalysis as mda
 import numpy as np
-import time
 from scipy.spatial import cKDTree
 from skimage import measure
+from numba import jitclass 
+import numba as nb
+from numba import float32,int32
 
+       
 class isosurface:
     def __init__(self,box,ngrids,sigma=2.4,kdTree=True,field=None,verbose=False):
         """
