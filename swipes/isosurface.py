@@ -1,9 +1,7 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from skimage import measure
-from numba import jitclass 
-import numba as nb
-from numba import float32,int32
+from numba import jit
 
        
 class isosurface:
@@ -52,29 +50,6 @@ class isosurface:
         else:
             self.tree = None
     
-    def coarse_grain(self,dr,sigma):
-        """
-        coarse graining function for the density of a field
-        dr: the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
-        sigma: the "standard deviation" of the gaussian field applied on each of the molecules
-        
-        returns:
-            the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input) 
-        """
-        if isinstance(dr,np.ndarray):
-            if dr.ndim >= 2:
-                d = dr.shape[-1]
-                sum_ = (dr**2).sum(axis=-1)
-            if dr.ndim == 1:
-                d = dr.shape[0]
-                sum_ = (dr**2).sum()
-
-        if isinstance(dr,float) or isinstance(dr,int):
-            d = 1
-            sum_ = dr**2
-
-        return (2*np.pi*sigma**2)**(-d/2)*np.exp(-sum_/(2*sigma**2))
-
     def field_density_kdtree(self,pos,n=2.5,keep_d=None):
         """
         This is not a exact way to find the density field, but cut off the density gaussian at 
@@ -118,7 +93,7 @@ class isosurface:
 
             # correct pbc
             dr = abs(cond*box - dr)
-            self.field[index] += self.coarse_grain(dr,sigma)
+            self.field[index] += coarse_grain(dr,sigma)
             ix += 1                 
 
         self.field = self.field.reshape(Nx,Ny,Nz)
@@ -171,13 +146,7 @@ class isosurface:
 
         for p in pos: 
             indices = np.ceil(p/dbox)    
-            # adding dictionary actually decreases performance because of memory usage
-            # num = indices[-1]*Nx*Ny+indices[1]*Nx+indices[0]
-            #if num in self.dict:
-            #    idx = self.dict[num]
-            #    if verbose:
-            #        print("dict used")
-            #else:
+
             back = indices - nidx_search
             forward = indices + nidx_search
 
@@ -203,7 +172,7 @@ class isosurface:
             # correct pbc
             dr = abs(cond*box - dr)
 
-            self.field[idx[:,0],idx[:,1],idx[:,2]] += self.coarse_grain(dr,sigma)
+            self.field[idx[:,0],idx[:,1],idx[:,2]] += coarse_grain(dr,sigma)
 
         return self.field
 
@@ -356,3 +325,20 @@ class isosurface:
         verts,faces,_,_ = measure.marching_cubes_lewiner(field,c,spacing=(dx,dy,dz))
 
         return verts[faces] 
+
+@jit
+def coarse_grain(dr,sigma):
+    """
+    coarse graining function for the density of a field
+    dr: the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
+    sigma: the "standard deviation" of the gaussian field applied on each of the molecules
+    
+    returns:
+        the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input) 
+    """
+    d = dr.shape[-1]
+    sum_ = (dr**2).sum(axis=-1)
+    
+    return (2*np.pi*sigma**2)**(-d/2)*np.exp(-sum_/(2*sigma**2))
+
+
