@@ -5,7 +5,7 @@ from scipy.spatial import cKDTree
 from skimage import measure
 
 class isosurface:
-    def __init__(self,box,ngrids,sigma=2.4,kdTree=True,field=None):
+    def __init__(self,box,ngrids,sigma=2.4,kdTree=True,field=None,verbose=False):
         """
         pos: position of the atoms/virtual atoms(COM) in the desired probe volume (N,3),
              these are already normalized where pox[x,y,z] all lie respectively in [0,Lx),[0,Ly),[0,Lz)
@@ -13,6 +13,7 @@ class isosurface:
         ngrids: a np.ndarray of [Nx,Ny,Nz]
         sigma: the sigma used for coarse graining of density field
         """
+        self.verbose = verbose
         self.box = box
         self.Lx,self.Ly,self.Lz = box
 
@@ -26,7 +27,8 @@ class isosurface:
 
         # User can pass in a field or else it will be None
         if field is not None:
-            print("You have passed in a density field!")
+            if verbose:
+                print("You have passed in a density field!")
         self.field = field
         self.dict = {}
 
@@ -43,7 +45,8 @@ class isosurface:
         self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
         if kdTree:
             self.tree = cKDTree(self.grids,boxsize=self.box)
-            print("KDtree built, now isosurface.field_density_kdtree can be used.")
+            if self.verbose:
+                print("KDtree built, now isosurface.field_density_kdtree can be used.")
         else:
             self.tree = None
     
@@ -120,7 +123,7 @@ class isosurface:
 
         return self.field
 
-    def field_density_cube(self,pos,n=2.5,keep_d=None,verbose=False):
+    def field_density_cube(self,pos,n=2.5,keep_d=None):
         """
         Find all the distances in a cube, this method doesn't use any search method but rather indexing into self.grids array
         For every atom, it first finds the nearest index to the atom by simply perform floor(x/dx,y/dy,z/dz). Once the nearest
@@ -139,7 +142,7 @@ class isosurface:
                 a field of shape (Nx,Ny,Nz) from ngrids
         """
         if self.field is not None:
-            if verbose:
+            if self.verbose:
                 print("The field that was passed or was just calculated in will now be overwritten")
 
         dbox = self.dbox
@@ -248,7 +251,7 @@ class isosurface:
             pgrid = cgrid
         return x
 
-    def surface2d(self,field2d=None,grids2d=None,c=0.016):
+    def surface2d(self,field2d=None,grids2d=None,c=0.016,verbose=False):
         """
         Function that calculates the points to plot a 2d surface
         fields2d: the x & z field usually (Nx,Nz), if None, then will use self.field
