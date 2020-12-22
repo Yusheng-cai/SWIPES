@@ -340,6 +340,3 @@ class isosurface:
         verts,faces,_,_ = measure.marching_cubes_lewiner(field,c,spacing=(dx,dy,dz))
 
         return verts[faces] 
-
-@jit
-
