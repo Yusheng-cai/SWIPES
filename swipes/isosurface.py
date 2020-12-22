@@ -49,6 +49,21 @@ class isosurface:
                 print("KDtree built, now isosurface.field_density_kdtree can be used.")
         else:
             self.tree = None
+    def coarse_grain(self,dr,sigma):
+        """
+        coarse graining function for the density of a field
+        dr: the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
+        sigma: the "standard deviation" of the gaussian field applied on each of the molecules
+        
+        returns:
+            the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input) 
+        """
+        d = dr.shape[-1]
+        sum_ = (dr**2).sum(axis=-1)
+        
+        return (2*np.pi*sigma**2)**(-d/2)*np.exp(-sum_/(2*sigma**2))
+
+
     
     def field_density_kdtree(self,pos,n=2.5,keep_d=None):
         """
@@ -93,7 +108,7 @@ class isosurface:
 
             # correct pbc
             dr = abs(cond*box - dr)
-            self.field[index] += coarse_grain(dr,sigma)
+            self.field[index] += self.coarse_grain(dr,sigma)
             ix += 1                 
 
         self.field = self.field.reshape(Nx,Ny,Nz)
@@ -161,7 +176,7 @@ class isosurface:
 
             idx += left_PBC_cond*ngrids
             idx -= right_PBC_cond*ngrids
-            #self.dict[num] = idx
+
             dr = abs(p - grids[idx[:,0],idx[:,1],idx[:,2]])
 
             # check pbc
@@ -172,7 +187,7 @@ class isosurface:
             # correct pbc
             dr = abs(cond*box - dr)
 
-            self.field[idx[:,0],idx[:,1],idx[:,2]] += coarse_grain(dr,sigma)
+            self.field[idx[:,0],idx[:,1],idx[:,2]] += self.coarse_grain(dr,sigma)
 
         return self.field
 
@@ -327,18 +342,4 @@ class isosurface:
         return verts[faces] 
 
 @jit
-def coarse_grain(dr,sigma):
-    """
-    coarse graining function for the density of a field
-    dr: the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
-    sigma: the "standard deviation" of the gaussian field applied on each of the molecules
-    
-    returns:
-        the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input) 
-    """
-    d = dr.shape[-1]
-    sum_ = (dr**2).sum(axis=-1)
-    
-    return (2*np.pi*sigma**2)**(-d/2)*np.exp(-sum_/(2*sigma**2))
-
 
