@@ -1,17 +1,20 @@
 import numpy as np
 from scipy.spatial import cKDTree
 from skimage import measure
-from numba import jit
+from numba import jit,njit
 
        
 class isosurface:
-    def __init__(self,box,ngrids,sigma=2.4,kdTree=True,field=None,verbose=False):
+    def __init__(self,box,ngrids,sigma=2.4,n=2.5,kdTree=True,field=None,verbose=False):
         """
         pos: position of the atoms/virtual atoms(COM) in the desired probe volume (N,3),
              these are already normalized where pox[x,y,z] all lie respectively in [0,Lx),[0,Ly),[0,Lz)
         box: a np.ndarray of [Lx,Ly,Lz]
         ngrids: a np.ndarray of [Nx,Ny,Nz]
         sigma: the sigma used for coarse graining of density field
+        n: the cutoff radius for n*sigma
+        kdtree: whether or not to build kdtree
+        verbose: whether or not to print stuff (be verbose)
         """
         self.verbose = verbose
         self.box = box
@@ -24,13 +27,15 @@ class isosurface:
         self.dx,self.dy,self.dz = self.dbox
 
         self.sigma = sigma
+        self.n = n
+        self.L = n*sigma
+        self.nidx_search = np.ceil(self.L/self.dbox) 
 
         # User can pass in a field or else it will be None
         if field is not None:
             if verbose:
                 print("You have passed in a density field!")
         self.field = field
-        self.dict = {}
 
         self.initialize(kdTree)
 
@@ -43,27 +48,27 @@ class isosurface:
         xx = np.moveaxis(xx,0,-1)
         yy = np.moveaxis(yy,1,0)
         self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
+
         if kdTree:
             self.tree = cKDTree(self.grids,boxsize=self.box)
             if self.verbose:
                 print("KDtree built, now isosurface.field_density_kdtree can be used.")
         else:
             self.tree = None
-    def coarse_grain(self,dr,sigma):
-        """
-        coarse graining function for the density of a field
-        dr: the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
-        sigma: the "standard deviation" of the gaussian field applied on each of the molecules
         
-        returns:
-            the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input) 
-        """
-        d = dr.shape[-1]
-        sum_ = (dr**2).sum(axis=-1)
-        
-        return (2*np.pi*sigma**2)**(-d/2)*np.exp(-sum_/(2*sigma**2))
+        # find reference "cube" for field_density_cube
+        ref_indices = np.array([0,0,0])
+        back = ref_indices - self.nidx_search
+        forward = ref_indices + self.nidx_search
 
+        x = np.r_[int(back[0]):int(forward[0])+1]
+        y = np.r_[int(back[1]):int(forward[1])+1]
+        z = np.r_[int(back[2]):int(forward[2])+1]
 
+        xx,yy,zz = np.meshgrid(x,y,z)
+        self.ref_idx = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
+
+    
     
     def field_density_kdtree(self,pos,n=2.5,keep_d=None):
         """
@@ -108,14 +113,14 @@ class isosurface:
 
             # correct pbc
             dr = abs(cond*box - dr)
-            self.field[index] += self.coarse_grain(dr,sigma)
+            self.field[index] += coarse_grain(dr,sigma)
             ix += 1                 
 
         self.field = self.field.reshape(Nx,Ny,Nz)
 
         return self.field
 
-    def field_density_cube(self,pos,n=2.5,keep_d=None):
+    def field_density_cube(self,pos,keep_d=None):
         """
         Find all the distances in a cube, this method doesn't use any search method but rather indexing into self.grids array
         For every atom, it first finds the nearest index to the atom by simply perform floor(x/dx,y/dy,z/dz). Once the nearest
@@ -137,23 +142,17 @@ class isosurface:
             if self.verbose:
                 print("The field that was passed or was just calculated in will now be overwritten")
 
+        keep_d_flag = False
+        
+        box = self.box
         dbox = self.dbox
         ngrids = self.ngrids
-        box = self.box
-        sigma = self.sigma
-        keep_d_flag = False
-
         Nx,Ny,Nz = self.nx,self.ny,self.nz
-        dx,dy,dz = self.dx,self.dy,self.dz
+        sigma = self.sigma
+
         # create grids and empty field
         grids = self.grids.reshape((Nx,Ny,Nz,3))
-        self.field = np.zeros((Nx,Ny,Nz))
-
-        # the length of the cubic box to search around an atom
-        L = n*sigma
-
-        # the number of index to search in [x,y,z]
-        nidx_search = np.ceil(L/dbox) 
+        self.field = np.zeros((Nx,Ny,Nz)) 
 
         if isinstance(keep_d,np.ndarray):
             d = keep_d
@@ -161,21 +160,9 @@ class isosurface:
 
         for p in pos: 
             indices = np.ceil(p/dbox)    
-
-            back = indices - nidx_search
-            forward = indices + nidx_search
-
-            x = np.r_[int(back[0]):int(forward[0])+1]
-            y = np.r_[int(back[1]):int(forward[1])+1]
-            z = np.r_[int(back[2]):int(forward[2])+1]
-
-            xx,yy,zz = np.meshgrid(x,y,z)
-            idx = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
-            left_PBC_cond = 1*(idx < 0)
-            right_PBC_cond = 1*(idx > ngrids-1)
-
-            idx += left_PBC_cond*ngrids
-            idx -= right_PBC_cond*ngrids
+            idx = self.ref_idx + indices
+            idx %= ngrids
+            idx = idx.astype(int)
 
             dr = abs(p - grids[idx[:,0],idx[:,1],idx[:,2]])
 
@@ -187,7 +174,7 @@ class isosurface:
             # correct pbc
             dr = abs(cond*box - dr)
 
-            self.field[idx[:,0],idx[:,1],idx[:,2]] += self.coarse_grain(dr,sigma)
+            self.field[idx[:,0],idx[:,1],idx[:,2]] += coarse_grain(dr,sigma)
 
         return self.field
 
@@ -340,3 +327,30 @@ class isosurface:
         verts,faces,_,_ = measure.marching_cubes_lewiner(field,c,spacing=(dx,dy,dz))
 
         return verts[faces] 
+
+@njit
+def sum_squared_2d_array_along_axis1(arr):
+    res = np.empty(arr.shape[0], dtype=arr.dtype)
+    for o_idx in range(arr.shape[0]):
+        sum_ = 0
+        for i_idx in range(arr.shape[1]):
+            sum_ += arr[o_idx, i_idx]*arr[o_idx,i_idx] 
+        res[o_idx] = sum_
+    return res
+
+
+@jit(nopython=True)
+def coarse_grain(dr,sigma):
+    """
+    coarse graining function for the density of a field
+    dr: the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
+    sigma: the "standard deviation" of the gaussian field applied on each of the molecules
+    
+    returns:
+        the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input) 
+    """
+    d = dr.shape[-1]
+    sum_ = sum_squared_2d_array_along_axis1(dr)
+    sigma2 = np.power(sigma,2)
+    
+    return np.power(2*np.pi*sigma2,-d/2)*np.exp(-sum_/(2*sigma2))
