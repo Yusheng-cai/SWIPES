@@ -21,4 +21,4 @@ dr = np.random.randn(100000,3)
 coarse_grain(dr,3)
     '''
 
-    print(timeit.timeit(setup=SETUP_CODE,stmt=TEST_CODE,number=50))
+    print(timeit.timeit(setup=SETUP_CODE,stmt=TEST_CODE,number=1000)/1000)

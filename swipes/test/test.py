@@ -1,10 +1,6 @@
-import swipes.isosurface as prod_iso 
-from isosurface import *
-import numpy as np
 import time
 import multiprocessing as mp
-from analysis_code.Liquid_crystal.Liquid_crystal import *
-import os
+import timeit
 
 def find_pos(LC_obj,time,constraints):
           xmin,xmax,ymin,ymax,zmin,zmax = constraints
@@ -27,24 +23,22 @@ def find_pos(LC_obj,time,constraints):
 
 
 if __name__ == '__main__':
-          LC_obj = LC(os.getcwd()+"/SWIPES5CB_test",10,5,bulk=False)
-          constraints = np.array([110,210,0,70,32,113.5])
+    SETUP_CODE = '''
+from swipes.isosurface import isosurface 
+from analysis_code.Liquid_crystal.Liquid_crystal import LC
+from __main__ import find_pos
+import os
+import numpy as np
+LC_obj = LC(os.getcwd()+"/SWIPES5CB_test",10,5,bulk=False)
+constraints = np.array([110,210,0,70,32,113.5])
 
-          pos = find_pos(LC_obj,0,constraints)
-          box = np.array([100,70,80])
-          ngrids = np.array([50,50,50])
-          iso = prod_iso(box,ngrids,sigma=6,n=3,kdTree=False)
-          iso_test = isosurface(box,ngrids,sigma=6,n=3,kdTree=False) 
+pos = find_pos(LC_obj,0,constraints)
+box = np.array([100,70,80])
+ngrids = np.array([50,50,50])
 
-          s = time.perf_counter()
-          iso.field_density_cube(pos,keep_d=np.array([0,1,1]))
-          e = time.perf_counter()
-          print("Time it takes for JIT compiled CG fcn is {}".format(e-s)) 
-
-          s = time.perf_counter()
-          iso_test.field_density_cube(pos,keep_d=np.array([0,1,1]))
-          e = time.perf_counter()
-          print("Time it takes for non JIT compiled CG fcn is {}".format(e-s)) 
- 
-
-          
+iso = isosurface(box,ngrids,sigma=6,n=3,kdTree=False)
+'''
+    RUN_CODE = '''
+iso.field_density_cube(pos,keep_d=np.array([0,1,1]))
+'''
+    print(timeit.timeit(setup=SETUP_CODE,stmt=RUN_CODE,number=20)/20)
