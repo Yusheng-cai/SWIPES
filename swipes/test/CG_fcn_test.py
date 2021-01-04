@@ -1,7 +1,5 @@
-from swipes.isosurface import coarse_grain,sum_squared_2d_array_along_axis1
-import numpy as np
 import timeit
-from numba import jit,njit
+import numpy as np
 
 def c(dr,sigma):
     d = dr.shape[-1]
@@ -14,11 +12,20 @@ if __name__ == '__main__':
     SETUP_CODE = '''
 from swipes.isosurface import coarse_grain,sum_squared_2d_array_along_axis1
 import numpy as np  
+from __main__ import c
+dr = np.random.randn(100000,3)
     '''
 
     TEST_CODE = '''
-dr = np.random.randn(100000,3)
 coarse_grain(dr,3)
     '''
 
-    print(timeit.timeit(setup=SETUP_CODE,stmt=TEST_CODE,number=1000)/1000)
+    TEST_CODE2 = '''
+c(dr,3)
+'''
+
+    jit = timeit.timeit(setup=SETUP_CODE,stmt=TEST_CODE,number=10000)/10000
+    nojit = timeit.timeit(setup=SETUP_CODE,stmt=TEST_CODE2,number=10000)/10000
+
+    print("Time it takes for JIT CG function is {}".format(jit))
+    print("Time it takes for non JIT CG function is {}".format(nojit))
