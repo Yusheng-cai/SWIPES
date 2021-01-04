@@ -9,3 +9,4 @@ __pyache__/
 *.npz
 swipes/__pycache__/
 swipes/lib/__pycache__/
+swipes/test/__pycache__/
