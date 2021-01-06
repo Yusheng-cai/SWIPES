@@ -1,10 +1,9 @@
 import sys
 sys.path.insert(0,"../isosurface")
 from isosurface import isosurface
-from analysis_code.Liquid_crystal.Liquid_crystal import *
-from wham.lib.utils import *
 import numpy as np
 import multiprocessing as mp
+import MDAnalysis as mda
 import time
 
 def run(u,iso,field,timestep,output):
@@ -12,8 +11,9 @@ def run(u,iso,field,timestep,output):
     N = len(timestep)
     for t in timestep:
         u.trajectory[t]
-        nCB = u.select_atoms("resname 5CB")
-        pos = nCB.atoms.positions
+        OW = u.select_atoms("type OW")
+        pos = OW.atoms.positions
+
         pos = pos[pos[:,0]>=xmin]
         pos = pos[pos[:,0]<=xmax]
 
@@ -33,27 +33,24 @@ def run(u,iso,field,timestep,output):
     output.put(field)
 
 if __name__ == '__main__':
-    path = '../test/SWIPES5CB_16400'
-    N = "test"
-    c = 0.00125
     start = 0
-    end = 40
+    end = 100
     skip = 1
     num_process = 8
 
     times = np.arange(start,end,step=skip)
     times_list = np.array_split(times,num_process)
 
-    xmin = 130.0
-    xmax = 210.0
+    xmin = 70.0
+    xmax = 150.0
     Lx = xmax - xmin
 
     ymin = 0.0
     ymax = 70.0
     Ly = ymax - ymin
 
-    zmin = 32.0
-    zmax = 113.5
+    zmin = 35.0
+    zmax = 60.0
     Lz = zmax - zmin
 
     mesh_x = 50
@@ -62,7 +59,7 @@ if __name__ == '__main__':
     mesh = np.array([mesh_x,mesh_y,mesh_z])
     box = np.array([Lx,Ly,Lz])
 
-    iso = isosurface(box,mesh,sigma=3.4,n=3,kdTree=False)
+    iso = isosurface(box,mesh,n=2.5,kdTree=False)
     print("isosurface object made")
 
 
@@ -73,7 +70,7 @@ if __name__ == '__main__':
     
 
     for i in range(num_process):
-        u = LC(path,10,5,bulk=False)['universe']
+        u = mda.Universe("../test/SWIPES_2900/SWIPES_2900.tpr","../test/SWIPES_2900/SWIPES_2900_pbc.xtc")
         p = mp.Process(target=run,args=(u,iso,field,times_list[i],output))
         process.append(p)
 

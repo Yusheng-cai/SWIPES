@@ -5,8 +5,8 @@ import os
 
 def find_pos(u,time,constraints):
       u.trajectory[time] 
-      nCB = u.select_atoms("resname 5CB")
-      pos = nCB.atoms.positions
+      OH = u.select_atoms("type OW")
+      pos = OH.atoms.positions
 
       xmin,xmax,ymin,ymax,zmin,zmax = constraints
       pos = pos[pos[:,0]>=xmin]
@@ -28,20 +28,20 @@ if __name__ == '__main__':
     SETUP_CODE = '''
 import sys 
 sys.path.insert(0,"../isosurface")
-from analysis_code.Liquid_crystal.Liquid_crystal import LC
+from isosurface import isosurface
+import MDAnalysis as mda
 import numpy as np
 import os 
 from __main__ import find_pos
-LC_obj = LC("../test/SWIPES5CB_16400",10,5,bulk=False)
-constraints = np.array([130,210,0,70,32,113.5])
 
-u = LC_obj["universe"]
+u = mda.Universe("../test/SWIPES_2900/SWIPES_2900.tpr","../test/SWIPES_2900/SWIPES_2900_pbc.xtc")
+constraints = np.array([70,155,0,70,35,60])
 pos = find_pos(u,0,constraints)
-print(pos.shape)
-box = np.array([100,70,80])
+
+box = np.array([155-70,70,25])
 ngrids = np.array([50,50,50])
 
-iso = isosurface(box,ngrids,sigma=3.4,n=3,kdTree=False)
+iso = isosurface(box,ngrids,n=2.5,kdTree=False)
 '''
 
     RUN_CODE = '''
