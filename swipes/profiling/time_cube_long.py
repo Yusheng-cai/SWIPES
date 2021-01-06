@@ -1,4 +1,6 @@
-from swipes.isosurface import isosurface
+import sys
+sys.path.insert(0,"../isosurface")
+from isosurface import isosurface
 from analysis_code.Liquid_crystal.Liquid_crystal import *
 from wham.lib.utils import *
 import numpy as np

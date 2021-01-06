@@ -26,7 +26,8 @@ def find_pos(u,time,constraints):
 
 if __name__ == '__main__':
     SETUP_CODE = '''
-from swipes.isosurface import isosurface 
+import sys 
+sys.path.insert(0,"../isosurface")
 from analysis_code.Liquid_crystal.Liquid_crystal import LC
 import numpy as np
 import os 
