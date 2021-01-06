@@ -70,20 +70,21 @@ class isosurface:
 
     
     
-    def field_density_kdtree(self,pos,n=2.5,keep_d=None):
+    def field_density_kdtree(self,pos,n=2.5,d=np.array([1,1,1])):
         """
         This is not a exact way to find the density field, but cut off the density gaussian at 
         n*sigma. The meshgrid points within the radius are found using kdtree, building of the 
         tree is M log(M) and searching takes log(M). 
 
         n: the n in the cutoff n*sigma that we want to approximate the density field by
-        keep_d: the dimension to be ignored in pbc calculation, a numpy array with shape (3,)
+        d: the dimension to be ignored in pbc calculation, a numpy array with shape (3,)
 
         returns:
             the field density 
         """
         if self.field is not None:
-            print("The field that was passed in will now be overwritten")
+            if self.verbose:
+                print("The field that was passed in will now be overwritten")
         sigma = self.sigma
 
         if self.tree is None:
@@ -93,12 +94,7 @@ class isosurface:
 
         box = self.box
         grids = self.grids
-        keep_d_flag = False
         Nx,Ny,Nz = self.nx,self.ny,self.nz
-
-        if isinstance(keep_d,np.ndarray):
-            d = keep_d
-            keep_d_flag = True
 
         self.idx = tree.query_ball_point(pos,sigma*n)  
         self.field = np.zeros((self.nx*self.ny*self.nz,))
@@ -108,8 +104,7 @@ class isosurface:
             dr = abs(pos[ix] - grids[index])
             # check pbc
             cond = 1*(dr > box/2)
-            if keep_d_flag:
-                cond = cond*d
+            cond = cond*d
 
             # correct pbc
             dr = abs(cond*box - dr)
@@ -120,7 +115,7 @@ class isosurface:
 
         return self.field
 
-    def field_density_cube(self,pos,keep_d=None):
+    def field_density_cube(self,pos,d=np.array([1,1,1])):
         """
         Find all the distances in a cube, this method doesn't use any search method but rather indexing into self.grids array
         For every atom, it first finds the nearest index to the atom by simply perform floor(x/dx,y/dy,z/dz). Once the nearest
@@ -133,17 +128,14 @@ class isosurface:
 
         pos: the positions of the atoms (Ntot,3)
         n: the "radius" of a cube that the code will search for 
-        keep_d: which dimension will not be ignored (numpy array (3,))
+        d: which dimension will not be ignored (numpy array (3,))
 
         returns: 
                 a field of shape (Nx,Ny,Nz) from ngrids
         """
         if self.field is not None:
             if self.verbose:
-                print("The field that was passed or was just calculated in will now be overwritten")
-
-        keep_d_flag = False
-        
+                print("The field that was passed or was just calculated in will now be overwritten") 
         box = self.box
         dbox = self.dbox
         ngrids = self.ngrids
@@ -153,10 +145,6 @@ class isosurface:
         # create grids and empty field
         grids = self.grids.reshape((Nx,Ny,Nz,3))
         self.field = np.zeros((Nx,Ny,Nz)) 
-
-        if isinstance(keep_d,np.ndarray):
-            d = keep_d
-            keep_d_flag = True
 
         for p in pos: 
             indices = np.ceil(p/dbox)    
@@ -168,8 +156,7 @@ class isosurface:
 
             # check pbc
             cond = 1*(dr > box/2)
-            if keep_d_flag:
-                cond = cond*d
+            cond = cond*d
 
             # correct pbc
             dr = abs(cond*box - dr)
