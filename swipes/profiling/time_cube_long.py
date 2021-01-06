@@ -1,9 +1,8 @@
-from swipes.isosurface import *
+from swipes.isosurface import isosurface
 from analysis_code.Liquid_crystal.Liquid_crystal import *
 from wham.lib.utils import *
 import numpy as np
 import multiprocessing as mp
-import os
 import time
 
 def run(u,iso,field,timestep,output):
@@ -26,7 +25,7 @@ def run(u,iso,field,timestep,output):
         pos[:,1] -= pos[:,1].min()
         pos[:,2] -= pos[:,2].min()
 
-        field += iso.field_density_cube(pos,keep_d=np.array([0,1,1]))/N
+        field += iso.field_density_cube(pos,d=np.array([0,1,1]))/N
         print("{} is done".format(t))
         ix += 1
     output.put(field)
@@ -62,7 +61,7 @@ if __name__ == '__main__':
     box = np.array([Lx,Ly,Lz])
 
     iso = isosurface(box,mesh,sigma=3.4,n=3,kdTree=False)
-    print("isosurface object made with kdtree")
+    print("isosurface object made")
 
 
     field = np.zeros((mesh_x,mesh_y,mesh_z))

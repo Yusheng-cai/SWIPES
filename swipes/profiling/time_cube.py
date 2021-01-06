@@ -26,9 +26,7 @@ def find_pos(u,time,constraints):
 
 if __name__ == '__main__':
     SETUP_CODE = '''
-import sys
-sys.path.insert(0,'/Users/caiyusheng/Desktop/Research/Research_code/SWIPES/swipes')
-from isosurface import isosurface
+from swipes.isosurface import isosurface 
 from analysis_code.Liquid_crystal.Liquid_crystal import LC
 import numpy as np
 import os 
@@ -46,7 +44,7 @@ iso = isosurface(box,ngrids,sigma=3.4,n=3,kdTree=False)
 '''
 
     RUN_CODE = '''
-iso.field_density_cube(pos,keep_d=np.array([0,1,1]))
+iso.field_density_cube(pos,d=np.array([0,1,1]))
 '''
 
     print(timeit.timeit(setup=SETUP_CODE,stmt=RUN_CODE,number=10)/10)
