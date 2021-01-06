@@ -10,3 +10,5 @@ __pyache__/
 swipes/__pycache__/
 swipes/lib/__pycache__/
 swipes/test/__pycache__/
+swipes/test/SWIPES5CB_16400/
+swipes/test/density_field5CB_test.npy
