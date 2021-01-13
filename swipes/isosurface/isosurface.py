@@ -165,7 +165,7 @@ class isosurface:
 
         return self.field
 
-    def surface1d(self,field1d=None,grids1d=None,c=0.016):
+    def surface1d(self,field1d=None,grids1d=None,c=0.016,direction='yz'):
         """
         Function that calculates the points to plot a 1d surface
 
@@ -173,20 +173,36 @@ class isosurface:
         out y and z dependence
         grids1d: the x grids usually (Nx,), if None, then will generate grids based on self.Nx and self.Lx
         c: where the isosurface lie
+        direction: which direction to average over
 
         returns:
-           The point where the surface cross 0.016 
+           The point where the surface crosses c 
         """
         if field1d is None and self.field is None:
             raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
+        
+        if direction == 'yz':
+            n,L = self.nx,self.Lx
+        if direction == 'xz':
+            n,L = self.ny,self.Ly
+        if direction == 'xy':
+            n,L = self.nz,self.Lz
 
         if field1d is not None:
             field = field1d
         else:
-            field = (self.field.sum(axis=-1)/self.nz).sum(axis=-1)/self.ny # (Nx,)
+            if direction == 'yz':
+                # sum over y and z
+                field = (self.field.sum(axis=-1)/self.nz).sum(axis=-1)/self.ny # (Nx,)
+            if direction == 'xz':
+                # sum over x and z
+                field = (self.field.sum(axis=0)/self.nx).sum(axis=-1)/self.nz # (Ny,)
+            if direction == 'xy': 
+                # sum over x and y
+                field = (self.field.sum(axis=0)/self.nx).sum(axis=0)/self.ny # (Nz,)
 
         if grids1d is None:
-            grids = np.linspace(0,self.Lx,self.nx)
+            grids = np.linspace(0,L,n)
         else:
             grids = grids1d
 
@@ -205,29 +221,37 @@ class isosurface:
 
             if cond != 0:
                 ratio = (c - pfield)/(cfield-pfield) 
-                x = pgrid + ratio*(cgrid-pgrid)
+                interface = pgrid + ratio*(cgrid-pgrid)
 
             pfield = cfield
             pgrid = cgrid
-        return x
 
-    def surface2d(self,field2d=None,grids2d=None,c=0.016,verbose=False):
+        return interface, field
+
+    def surface2d(self,field2d=None,grids2d=None,c=0.016,verbose=False,direction='y'):
         """
         Function that calculates the points to plot a 2d surface
         fields2d: the x & z field usually (Nx,Nz), if None, then will use self.field
         grids2d: the x & z grids usually, if None, then will generate grids
         c: where the isosurface lie
+        verbose: whether to be verbose and print things
+        direction: which direction to average over for the 2d surface
 
         returns:    
             a list of points that lies on the 2d isosurface
         """
         if field2d is None and self.field is None:
             raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
-
+        
         if field2d is not None:
             field = field2d
         else:
-            field = self.field.sum(axis=1)/self.ny # (Nx,Ny)
+            if direction == 'y':
+                field = self.field.sum(axis=1)/self.ny # (Nx,Nz)
+            if direction == 'x':
+                field = self.field.sum(axis=0)/self.nx # (Ny,Nz)
+            if direction == 'z':
+                field = self.field.sum(axis=-1)/self.nz # (Nx,Ny)
 
         if grids2d is None:
             x = np.linspace(0,self.Lx,self.nx)
