@@ -309,7 +309,11 @@ class isosurface:
             pfield = cfield
             pgrids = cgrids
 
-        return np.concatenate(points_all)
+        surface2d = np.concatenate(points_all)
+        order = np.argsort(surface2d[:,-1])
+        surface2d = surface2d[order]
+
+        return surface2d
 
  
     def surface3d(self,c=0.016,gradient_direction='descent',field=None):
