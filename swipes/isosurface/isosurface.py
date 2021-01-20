@@ -68,7 +68,7 @@ class isosurface:
         self.ref_idx = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
 
     
-    def field_density_kdtree(self,pos,n=2.5,d=np.array([1,1,1])):
+    def field_density_kdtree(self,pos,d=np.array([1,1,1])):
         """
         This is not a exact way to find the density field, but cut off the density gaussian at 
         n*sigma. The meshgrid points within the radius are found using kdtree, building of the 
@@ -93,6 +93,7 @@ class isosurface:
         box = self.box
         grids = self.grids
         Nx,Ny,Nz = self.nx,self.ny,self.nz
+        n = self.n
 
         self.idx = tree.query_ball_point(pos,sigma*n)  
         self.field = np.zeros((self.nx*self.ny*self.nz,))
