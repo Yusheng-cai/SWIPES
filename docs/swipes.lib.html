@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>swipes.lib &mdash; swipes 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="swipes" href="swipes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> swipes
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">swipes</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="swipes.html">swipes</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">swipes.lib</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-swipes.lib.kdtree">swipes.lib.kdtree</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-swipes.lib.swipes_utils">swipes.lib.swipes_utils</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="swipes.html#module-swipes.isosurface">swipes.isosurface</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">swipes</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">swipes</a> &raquo;</li>
+        
+          <li><a href="swipes.html">swipes</a> &raquo;</li>
+        
+      <li>swipes.lib</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/swipes.lib.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swipes-lib">
+<h1>swipes.lib<a class="headerlink" href="#swipes-lib" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-swipes.lib.kdtree">
+<span id="swipes-lib-kdtree"></span><h2>swipes.lib.kdtree<a class="headerlink" href="#module-swipes.lib.kdtree" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swipes.lib.kdtree.Node">
+<em class="property">class </em><code class="sig-prename descclassname">swipes.lib.kdtree.</code><code class="sig-name descname">Node</code><a class="headerlink" href="#swipes.lib.kdtree.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<a class="reference internal" href="#swipes.lib.kdtree.Node" title="swipes.lib.kdtree.Node"><em>Node</em></a>) – left child</p></li>
+<li><p><strong>right</strong> (<a class="reference internal" href="#swipes.lib.kdtree.Node" title="swipes.lib.kdtree.Node"><em>Node</em></a>) – right child</p></li>
+<li><p><strong>dim</strong> (<em>int</em>) – dimension that it is split by</p></li>
+<li><p><strong>val</strong> (<em>float</em>) – the value it is split by</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="swipes.lib.kdtree.build_kdtree">
+<code class="sig-prename descclassname">swipes.lib.kdtree.</code><code class="sig-name descname">build_kdtree</code><span class="sig-paren">(</span><em class="sig-param">vectors</em>, <em class="sig-param">node</em>, <em class="sig-param">dimension</em>, <em class="sig-param">max_dimension</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.lib.kdtree.build_kdtree" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-swipes.lib.swipes_utils">
+<span id="swipes-lib-swipes-utils"></span><h2>swipes.lib.swipes_utils<a class="headerlink" href="#module-swipes.lib.swipes_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="swipes.lib.swipes_utils.cubic_lattice">
+<code class="sig-prename descclassname">swipes.lib.swipes_utils.</code><code class="sig-name descname">cubic_lattice</code><span class="sig-paren">(</span><em class="sig-param">Sx</em>, <em class="sig-param">Sy</em>, <em class="sig-param">Sz</em>, <em class="sig-param">lattice_spacing</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.lib.swipes_utils.cubic_lattice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that create a cubic lattice, the bottom left edge will always be at [0,0,0]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Sx</strong> (<em>float</em>) – The length of the box in the x direction (in nm)</p></li>
+<li><p><strong>Sy</strong> (<em>float</em>) – The length of the box in the y direction (in nm)</p></li>
+<li><p><strong>Sz</strong> (<em>float</em>) – The length of the box in the z direction (in nm)</p></li>
+<li><p><strong>lattice_spacing</strong> (<em>float</em>) – The lattice spacing between LJ atoms (in nm)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>coordinates for every atom in the lattice (Ntot,3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="swipes.lib.swipes_utils.write_LJparticle_gro">
+<code class="sig-prename descclassname">swipes.lib.swipes_utils.</code><code class="sig-name descname">write_LJparticle_gro</code><span class="sig-paren">(</span><em class="sig-param">coords</em>, <em class="sig-param">atom_name='WALL'</em>, <em class="sig-param">atom_type='Y'</em>, <em class="sig-param">file_path='WALL.gro'</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.lib.swipes_utils.write_LJparticle_gro" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="swipes.html" class="btn btn-neutral float-left" title="swipes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Yusheng Cai.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

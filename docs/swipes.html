@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>swipes &mdash; swipes 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="swipes.lib" href="swipes.lib.html" />
+    <link rel="prev" title="swipes" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> swipes
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">swipes</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">swipes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="swipes.lib.html">swipes.lib</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-swipes.isosurface">swipes.isosurface</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">swipes</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">swipes</a> &raquo;</li>
+        
+      <li>swipes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/swipes.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="swipes">
+<h1>swipes<a class="headerlink" href="#swipes" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="swipes.lib.html">swipes.lib</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="swipes.lib.html#module-swipes.lib.kdtree">swipes.lib.kdtree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swipes.lib.html#module-swipes.lib.swipes_utils">swipes.lib.swipes_utils</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="module-swipes.isosurface">
+<span id="swipes-isosurface"></span><h2>swipes.isosurface<a class="headerlink" href="#module-swipes.isosurface" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="swipes.isosurface.isosurface">
+<em class="property">class </em><code class="sig-prename descclassname">swipes.isosurface.</code><code class="sig-name descname">isosurface</code><span class="sig-paren">(</span><em class="sig-param">box</em>, <em class="sig-param">ngrids</em>, <em class="sig-param">sigma=2.4</em>, <em class="sig-param">n=2.5</em>, <em class="sig-param">kdTree=True</em>, <em class="sig-param">field=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.isosurface.isosurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>box</strong> (<em>np.ndarray</em>) – An array of [Lx,Ly,Lz]</p></li>
+<li><p><strong>ngrids</strong> (<em>np.ndarray</em>) – Number of grid points in each direction passed in as [Nx,Ny,Nz]</p></li>
+<li><p><strong>sigma</strong> (<em>np.ndarray</em>) – the sigma used for coarse graining function of density field by Willard and Chandler (default 2.4 for water)</p></li>
+<li><p><strong>n</strong> (<em>float</em>) – The cutoff radius for n*sigma (default 2.5 for water)</p></li>
+<li><p><strong>kdtree</strong> (<em>bool</em>) – whether or not to build kdtree (default True)</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – whether or not to print stuff (default False)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="swipes.isosurface.isosurface.initialize">
+<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param">kdTree=True</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.isosurface.isosurface.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that initializes the isosurface class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kdtree</strong> (<em>bool</em>) – A boolean that defines whether or not the method uses kdtree algorithm</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Imagine a point is surrounded by a cube volume of grid points, ref_idx is the grid points sorrounding point (0,0,0) where then the latter ones can just simply add (x,y,z) to this to obtain the points in their respective cube
+self.grids(np.ndarray): the (x,y,z) grids shaped in (Nx,Ny,Nz)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self.ref_idx(np.ndarray)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="swipes.isosurface.isosurface.field_density_kdtree">
+<code class="sig-name descname">field_density_kdtree</code><span class="sig-paren">(</span><em class="sig-param">pos</em>, <em class="sig-param">d=array([1</em>, <em class="sig-param">1</em>, <em class="sig-param">1])</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.isosurface.isosurface.field_density_kdtree" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is not a exact way to find the density field, but cut off the density gaussian at
+n*sigma. The meshgrid points within the radius are found using kdtree, building of the
+tree is M log(M) and searching takes log(M).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>np.ndarray</em>) – position of the atoms/virtual atoms(COM) in the desired probe volume of shape (N,3),these should be already normalized where pos[0,:], pos[1,:],pos[2:,] all lie respectively in [0,Lx),[0,Ly),[0,Lz)</p></li>
+<li><p><strong>d</strong> (<em>np.ndarray</em>) – the dimension to be kept in pbc calculation. (3,) (default [1,1,1])</p></li>
+<li><p><strong>returns</strong> – the field density (Nx,Ny,Nz)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="swipes.isosurface.isosurface.field_density_cube">
+<code class="sig-name descname">field_density_cube</code><span class="sig-paren">(</span><em class="sig-param">pos</em>, <em class="sig-param">d=array([1</em>, <em class="sig-param">1</em>, <em class="sig-param">1])</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.isosurface.isosurface.field_density_cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all the distances in a cube, this method doesn’t use any search method but rather indexing into self.grids array
+For every atom, it first finds the nearest index to the atom by simply perform floor(x/dx,y/dy,z/dz). Once the nearest
+index to the atom is found which we will call (ix,iy,iz), it then tries to find all the points in a cube with length 2L
+centered around the index. L is usually determined by n*sigma.
+The number of indices that one needs to search in every direction is determined by ceil(L/dx,L/dy,L/dz) which we call (nx,ny,nz).
+So xrange=(ix-nx,ix+nx), yrange=(iy-ny,iy+ny),zrange=(iz-nz,iz+nz). All the indices can then be found by
+meshgrid(xrange,yrange,zrange). Then PBC can be easily taken care of by subtracting all indices in the meshgrid that are larger than (nx,ny,nz)
+by (nx,ny,nz) and add (nx,ny,nz) to all the ones that are smaller than 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>np.ndarray</em>) – the positions of the atoms (Ntot,3)</p></li>
+<li><p><strong>d</strong> (<em>np.ndarray</em>) – which dimension will not be ignored (numpy array (3,))</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a field of shape (Nx,Ny,Nz) from ngrids</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="swipes.isosurface.isosurface.surface1d">
+<code class="sig-name descname">surface1d</code><span class="sig-paren">(</span><em class="sig-param">field1d=None</em>, <em class="sig-param">grids1d=None</em>, <em class="sig-param">c=0.016</em>, <em class="sig-param">direction='yz'</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.isosurface.isosurface.surface1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that calculates the points to plot a 1d surface</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field1d</strong> (<em>np.ndarray</em>) – the x field usually (Nx,), if None, then will be calculated from self.field by integrating out y and z dependence (default None)</p></li>
+<li><p><strong>grids1d</strong> (<em>np.ndarray</em>) – the x grids usually (Nx,), if None, then will generate grids based on self.Nx and self.Lx (default None)</p></li>
+<li><p><strong>c</strong> (<em>float</em>) – where the isosurface lie (default 0.016 for water)</p></li>
+<li><p><strong>direction</strong> (<em>str</em>) – which direction to average over (default ‘yz’, sum over y and z)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1.rho1d = numpy array of integrated and averaged density
+2.point = The point where the surface crosses c</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="swipes.isosurface.isosurface.surface2d">
+<code class="sig-name descname">surface2d</code><span class="sig-paren">(</span><em class="sig-param">field2d=None</em>, <em class="sig-param">grids2d=None</em>, <em class="sig-param">c=0.016</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">direction='y'</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.isosurface.isosurface.surface2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that calculates the on the 2d surface from rho(x,z), similar to marching squares algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fields2d</strong> (<em>np.ndarray</em>) – the x &amp; z field usually (Nx,Nz), if None, then will use self.field (default None)</p></li>
+<li><p><strong>grids2d</strong> (<em>np.ndarray</em>) – the x &amp; z grids usually, if None, then will generate grids (default None)</p></li>
+<li><p><strong>c</strong> (<em>float</em>) – where the isosurface lie (default 0.016)</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – whether to be verbose and print things (default False)</p></li>
+<li><p><strong>direction</strong> (<em>str</em>) – which direction to average over for the 2d surface (default ‘y’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A numpy array with points that lies on the 2d isosurface</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="swipes.isosurface.isosurface.surface3d">
+<code class="sig-name descname">surface3d</code><span class="sig-paren">(</span><em class="sig-param">c=0.016</em>, <em class="sig-param">gradient_direction='descent'</em>, <em class="sig-param">field=None</em><span class="sig-paren">)</span><a class="headerlink" href="#swipes.isosurface.isosurface.surface3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output the vector positions of the triangles needed for graphing isosurface from marching cubes algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> (<em>float</em>) – the contour line value for the isosurface (default 0.016 for water)</p></li>
+<li><p><strong>gradient_direction</strong> (<em>str</em>) – ‘descent’ if the values exterior of the object are smaller,
+‘ascent’ if the values exterior of the object are bigger</p></li>
+<li><p><strong>field</strong> (<em>np.ndarray</em>) – field to be processed, if None, will look for self.field. (default None)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the indices for all triangles (N,3,3) where N=number of triangles</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="swipes.isosurface.sum_squared_2d_array_along_axis1">
+<code class="sig-prename descclassname">swipes.isosurface.</code><code class="sig-name descname">sum_squared_2d_array_along_axis1</code><a class="headerlink" href="#swipes.isosurface.sum_squared_2d_array_along_axis1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that sums a vector square along axis 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>arr</strong> (<em>np.ndarray</em>) – A numpy array with shape (N,L) where L is the dimension being summed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A numpy array with shape (N,)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="swipes.isosurface.coarse_grain">
+<code class="sig-prename descclassname">swipes.isosurface.</code><code class="sig-name descname">coarse_grain</code><a class="headerlink" href="#swipes.isosurface.coarse_grain" title="Permalink to this definition">¶</a></dt>
+<dd><p>coarse graining function for the density of a field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dr</strong> (<em>np.ndarray</em>) – the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – the “standard deviation” of the gaussian field applied on each of the molecules</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="swipes.lib.html" class="btn btn-neutral float-right" title="swipes.lib" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="modules.html" class="btn btn-neutral float-left" title="swipes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Yusheng Cai.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
