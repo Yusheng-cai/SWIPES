@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0,"../isosurface")
+sys.path.insert(0,"..")
 from isosurface import isosurface
 import numpy as np
 import MDAnalysis as mda

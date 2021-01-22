@@ -1,14 +1,15 @@
 import numpy as np
 
 class Node:
+    """
+    Args:
+        left(Node): left child
+        right(Node): right child
+        dim(int): dimension that it is split by
+        val(float): the value it is split by
+    """
+
     def __init__(self):
-        """
-        node has 4 attributes
-        left: left child
-        right: right child
-        dim: dimension that it is split by
-        val: the value it is split by
-        """
         self.left = None
         self.right = None
         self.dim = None

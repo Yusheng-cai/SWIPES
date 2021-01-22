@@ -4,17 +4,17 @@ from skimage import measure
 from numba import jit,njit
        
 class isosurface:
+    """
+    Args:
+        box(np.ndarray): An array of [Lx,Ly,Lz]
+        ngrids(np.ndarray): Number of grid points in each direction passed in as [Nx,Ny,Nz]
+        sigma(np.ndarray): the sigma used for coarse graining function of density field by Willard and Chandler (default 2.4 for water)
+        n(float): The cutoff radius for n*sigma (default 2.5 for water)
+        kdtree(bool): whether or not to build kdtree (default True)
+        verbose(bool): whether or not to print stuff (default False)
+    """
+
     def __init__(self,box,ngrids,sigma=2.4,n=2.5,kdTree=True,field=None,verbose=False):
-        """
-        pos: position of the atoms/virtual atoms(COM) in the desired probe volume (N,3),
-             these are already normalized where pox[x,y,z] all lie respectively in [0,Lx),[0,Ly),[0,Lz)
-        box: a np.ndarray of [Lx,Ly,Lz]
-        ngrids: a np.ndarray of [Nx,Ny,Nz]
-        sigma: the sigma used for coarse graining of density field
-        n: the cutoff radius for n*sigma
-        kdtree: whether or not to build kdtree
-        verbose: whether or not to print stuff (be verbose)
-        """
         self.verbose = verbose
         self.box = box
         self.Lx,self.Ly,self.Lz = box
@@ -39,6 +39,16 @@ class isosurface:
         self.initialize(kdTree)
 
     def initialize(self,kdTree=True):
+        """
+        Function that initializes the isosurface class
+
+        Args:
+            kdtree(bool): A boolean that defines whether or not the method uses kdtree algorithm
+        Return:
+            self.ref_idx(np.ndarray): Imagine a point is surrounded by a cube volume of grid points, ref_idx is the grid points sorrounding point (0,0,0) where then the latter ones can just simply add (x,y,z) to this to obtain the points in their respective cube 
+            self.grids(np.ndarray): the (x,y,z) grids shaped in (Nx,Ny,Nz) 
+            
+        """
         X = np.linspace(0,self.Lx,num=self.nx,endpoint=False)
         Y = np.linspace(0,self.Ly,num=self.ny,endpoint=False)
         Z = np.linspace(0,self.Lz,num=self.nz,endpoint=False)
@@ -74,11 +84,12 @@ class isosurface:
         n*sigma. The meshgrid points within the radius are found using kdtree, building of the 
         tree is M log(M) and searching takes log(M). 
 
-        n: the n in the cutoff n*sigma that we want to approximate the density field by
-        d: the dimension to be ignored in pbc calculation, a numpy array with shape (3,)
+        Args:
+            pos(np.ndarray): position of the atoms/virtual atoms(COM) in the desired probe volume of shape (N,3),these should be already normalized where pos[0,:], pos[1,:],pos[2:,] all lie respectively in [0,Lx),[0,Ly),[0,Lz)
+            d(np.ndarray): the dimension to be kept in pbc calculation. (3,) (default [1,1,1])
 
-        returns:
-            the field density 
+            returns:
+                the field density (Nx,Ny,Nz)
         """
         if self.field is not None:
             if self.verbose:
@@ -125,13 +136,13 @@ class isosurface:
         So xrange=(ix-nx,ix+nx), yrange=(iy-ny,iy+ny),zrange=(iz-nz,iz+nz). All the indices can then be found by 
         meshgrid(xrange,yrange,zrange). Then PBC can be easily taken care of by subtracting all indices in the meshgrid that are larger than (nx,ny,nz)
         by (nx,ny,nz) and add (nx,ny,nz) to all the ones that are smaller than 0.
+        
+        Args:
+            pos(np.ndarray): the positions of the atoms (Ntot,3)
+            d(np.ndarray): which dimension will not be ignored (numpy array (3,))
 
-        pos: the positions of the atoms (Ntot,3)
-        n: the "radius" of a cube that the code will search for 
-        d: which dimension will not be ignored (numpy array (3,))
-
-        returns: 
-                a field of shape (Nx,Ny,Nz) from ngrids
+        Return: 
+            a field of shape (Nx,Ny,Nz) from ngrids
         """
         if self.field is not None:
             if self.verbose:
@@ -170,14 +181,15 @@ class isosurface:
         """
         Function that calculates the points to plot a 1d surface
 
-        field1d: the x field usually (Nx,), if None, then will be calculated from self.field by integrating
-        out y and z dependence
-        grids1d: the x grids usually (Nx,), if None, then will generate grids based on self.Nx and self.Lx
-        c: where the isosurface lie
-        direction: which direction to average over
+        Args:
+            field1d(np.ndarray): the x field usually (Nx,), if None, then will be calculated from self.field by integrating out y and z dependence (default None)
+            grids1d(np.ndarray): the x grids usually (Nx,), if None, then will generate grids based on self.Nx and self.Lx (default None)
+            c(float): where the isosurface lie (default 0.016 for water)
+            direction(str): which direction to average over (default 'yz', sum over y and z)
 
-        returns:
-           The point where the surface crosses c 
+        Return:
+            1.rho1d = numpy array of integrated and averaged density
+            2.point = The point where the surface crosses c 
         """
         if field1d is None and self.field is None:
             raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
@@ -231,15 +243,17 @@ class isosurface:
 
     def surface2d(self,field2d=None,grids2d=None,c=0.016,verbose=False,direction='y'):
         """
-        Function that calculates the points to plot a 2d surface
-        fields2d: the x & z field usually (Nx,Nz), if None, then will use self.field
-        grids2d: the x & z grids usually, if None, then will generate grids
-        c: where the isosurface lie
-        verbose: whether to be verbose and print things
-        direction: which direction to average over for the 2d surface
+        Function that calculates the on the 2d surface from rho(x,z), similar to marching squares algorithm
 
-        returns:    
-            a list of points that lies on the 2d isosurface
+        Args:
+            fields2d(np.ndarray): the x & z field usually (Nx,Nz), if None, then will use self.field (default None)
+            grids2d(np.ndarray): the x & z grids usually, if None, then will generate grids (default None)
+            c(float): where the isosurface lie (default 0.016)
+            verbose(bool): whether to be verbose and print things (default False)
+            direction(str): which direction to average over for the 2d surface (default 'y')
+
+        Return:    
+            A numpy array with points that lies on the 2d isosurface
         """
         if field2d is None and self.field is None:
             raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
@@ -319,12 +333,15 @@ class isosurface:
  
     def surface3d(self,c=0.016,gradient_direction='descent',field=None):
         """
-        Output triangles needed for graphing isosurface 
-        c: the contour line value for the isosurface
-        gradient_direction: 'descent' if the values exterior of the object are smaller,
-                            'ascent' if the values exterior of the object are bigger
+        Output the vector positions of the triangles needed for graphing isosurface from marching cubes algorithm 
+
+        Args:
+            c(float): the contour line value for the isosurface (default 0.016 for water)
+            gradient_direction(str): 'descent' if the values exterior of the object are smaller,
+                                'ascent' if the values exterior of the object are bigger
+            field(np.ndarray): field to be processed, if None, will look for self.field. (default None)
         
-        output: 
+        Return: 
                 the indices for all triangles (N,3,3) where N=number of triangles
         """
         if self.field is None and field is None:
@@ -346,6 +363,15 @@ class isosurface:
 
 @njit
 def sum_squared_2d_array_along_axis1(arr):
+    """
+    Function that sums a vector square along axis 1
+
+    Args:
+        arr(np.ndarray): A numpy array with shape (N,L) where L is the dimension being summed
+
+    Return:
+        A numpy array with shape (N,)
+    """
     res = np.empty(arr.shape[0], dtype=arr.dtype)
     for o_idx in range(arr.shape[0]):
         sum_ = 0
@@ -359,9 +385,11 @@ def sum_squared_2d_array_along_axis1(arr):
 def coarse_grain(dr,sigma):
     """
     coarse graining function for the density of a field
-    dr: the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
-    sigma: the "standard deviation" of the gaussian field applied on each of the molecules
-    
+
+    Args:
+        dr(np.ndarray): the vector distance (could be float, 1d np.ndarray vector or 2d np.ndarray matrix)
+        sigma(float): the "standard deviation" of the gaussian field applied on each of the molecules
+        
     returns:
         the coarse grained density (float, 1d np.ndarray or 2d np.ndarray that matches the input) 
     """

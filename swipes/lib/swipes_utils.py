@@ -3,12 +3,14 @@ import numpy as np
 def cubic_lattice(Sx,Sy,Sz,lattice_spacing):
     """
     Function that create a cubic lattice, the bottom left edge will always be at [0,0,0]
-    Sx: The length of the box in the x direction (in nm)
-    Sy: The length of the box in the y direction (in nm)
-    Sz: The length of the box in the z direction (in nm)
-    lattice_spacing: The lattice spacing between LJ atoms (in nm)
 
-    output: 
+    Args:
+        Sx(float): The length of the box in the x direction (in nm)
+        Sy(float): The length of the box in the y direction (in nm)
+        Sz(float): The length of the box in the z direction (in nm)
+        lattice_spacing(float): The lattice spacing between LJ atoms (in nm)
+
+    Return: 
         coordinates for every atom in the lattice (Ntot,3)
     """
     if Sx % lattice_spacing == 0:
