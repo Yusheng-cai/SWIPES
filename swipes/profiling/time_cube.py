@@ -27,7 +27,7 @@ def find_pos(u,time,constraints):
 if __name__ == '__main__':
     SETUP_CODE = '''
 import sys 
-sys.path.insert(0,"../isosurface")
+sys.path.insert(0,"..")
 from isosurface import isosurface
 import MDAnalysis as mda
 import numpy as np
