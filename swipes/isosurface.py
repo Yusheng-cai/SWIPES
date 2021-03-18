@@ -2,7 +2,6 @@ import numpy as np
 from scipy.spatial import cKDTree
 from skimage import measure
 from numba import jit,njit
-import time
        
 class isosurface:
     """
@@ -14,29 +13,25 @@ class isosurface:
         kdtree(bool): whether or not to build kdtree (default True)
         verbose(bool): whether or not to print stuff (default False)
     """
-
-    def __init__(self,box,ngrids,sigma=2.4,n=2.5,kdTree=True,field=None,verbose=False):
+    def __init__(self,box,ngrids,sigma=2.4,n=2.5,kdTree=True,verbose=False):
         self.verbose = verbose
+        # Length of the box
         self.box = box
         self.Lx,self.Ly,self.Lz = box
-
+     
+        # number of grids each way
         self.ngrids = ngrids
         self.nx,self.ny,self.nz = ngrids
-
+        
+        # spacing between grids  
         self.dbox = box/ngrids
         self.dx,self.dy,self.dz = self.dbox
-
+        
+        # other parameters
         self.sigma = sigma
         self.n = n
         self.L = n*sigma
         self.nidx_search = np.ceil(self.L/self.dbox) 
-
-        # User can pass in a field or else it will be None
-        if field is not None:
-            if verbose:
-                print("You have passed in a density field!")
-
-        self.field = field
         self.initialize(kdTree)
 
     def initialize(self,kdTree=True):
@@ -95,9 +90,6 @@ class isosurface:
             returns:
                 the field density (Nx,Ny,Nz)
         """
-        if self.field is not None:
-            if self.verbose:
-                print("The field that was passed in will now be overwritten")
         sigma = self.sigma
 
         if self.tree is None:
@@ -150,10 +142,6 @@ class isosurface:
         ------
             a field of shape (Nx,Ny,Nz) from ngrids
         """
-        if self.field is not None:
-            if self.verbose:
-                print("The field that was passed or was just calculated in will now be overwritten") 
-
         box = self.box
         dbox = self.dbox
         ngrids = self.ngrids
@@ -166,7 +154,7 @@ class isosurface:
 
         for p in pos: 
             indices = np.ceil(p/dbox)    
-            idx = indices - self.ref_idx
+            idx = indices + self.ref_idx
             idx %= ngrids
             idx = idx.astype(int)
             
@@ -284,8 +272,8 @@ class isosurface:
 
         for i in range(1,N):
             # define "current field/grids" as in the current grid/field we are looking at that share the same x coordinate
-            cfield = field[i] # (nz, )
-            cgrids = grids[i] # (nz,2)
+            cfield = field[i] # (n2, )
+            cgrids = grids[i] # (n2,2)
             
             # first condition is the previous x (field) needs to be larger than c
             cond1 = pfield >= c
@@ -318,11 +306,12 @@ class isosurface:
             pgrids = cgrids
 
         surface2d = np.concatenate(points_all)
+
+        # sort surface2d by the second dimension for easier plotting
         order = np.argsort(surface2d[:,-1])
         surface2d = surface2d[order]
 
         return surface2d
-
  
     def surface3d(self,field,c=0.016,gradient_direction='descent'):
         """
@@ -380,18 +369,3 @@ def coarse_grain(dr,sigma):
     sigma2 = np.power(sigma,2)
     
     return np.power(2*np.pi*sigma2,-d/2)*np.exp(-sum_/(2*sigma2))
-
-@njit
-def abs_add_subtract(vec,matrix,sign=1):
-    res = np.empty(matrix.shape,dtype=matrix.dtype)
-    for i in range(matrix.shape[0]):
-        for j in range(matrix.shape[1]):
-            res[i,j] = abs(vec[j] + sign*matrix[i,j])
-    return res
-@njit
-def add_subtract(vec,matrix,sign=1):
-    res = np.empty(matrix.shape,dtype=matrix.dtype)
-    for i in range(matrix.shape[0]):
-        for j in range(matrix.shape[1]):
-            res[i,j] = vec[j] + sign*matrix[i,j]
-    return res
