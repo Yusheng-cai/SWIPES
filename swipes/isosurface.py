@@ -2,6 +2,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 from skimage import measure
 from numba import jit,njit
+import time
        
 class isosurface:
     """
@@ -34,8 +35,8 @@ class isosurface:
         if field is not None:
             if verbose:
                 print("You have passed in a density field!")
-        self.field = field
 
+        self.field = field
         self.initialize(kdTree)
 
     def initialize(self,kdTree=True):
@@ -54,6 +55,8 @@ class isosurface:
         Z = np.linspace(0,self.Lz,num=self.nz,endpoint=False)
         
         xx,yy,zz = np.meshgrid(X,Y,Z) # each of xx,yy,zz are of shape (Ni,Ni,Ni)
+
+        # Doing this to ensure that when reshape back, self.grids will be at the correct order in (X,Y,Z)
         xx = np.moveaxis(xx,0,-1)
         yy = np.moveaxis(yy,1,0)
         self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
@@ -73,8 +76,9 @@ class isosurface:
         x = np.r_[int(back[0]):int(forward[0])+1]
         y = np.r_[int(back[1]):int(forward[1])+1]
         z = np.r_[int(back[2]):int(forward[2])+1]
-
         xx,yy,zz = np.meshgrid(x,y,z)
+
+        # index surrounding the point of interest
         self.ref_idx = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
 
     
@@ -138,10 +142,12 @@ class isosurface:
         by (nx,ny,nz) and add (nx,ny,nz) to all the ones that are smaller than 0.
         
         Args:
+        ----
             pos(np.ndarray): the positions of the atoms (Ntot,3)
             d(np.ndarray): which dimension will not be ignored (numpy array (3,))
 
         Return: 
+        ------
             a field of shape (Nx,Ny,Nz) from ngrids
         """
         if self.field is not None:
@@ -156,14 +162,14 @@ class isosurface:
 
         # create grids and empty field
         grids = self.grids.reshape((Nx,Ny,Nz,3))
-        self.field = np.zeros((Nx,Ny,Nz)) 
+        field = np.zeros((Nx,Ny,Nz)) 
 
         for p in pos: 
             indices = np.ceil(p/dbox)    
-            idx = self.ref_idx + indices
+            idx = indices - self.ref_idx
             idx %= ngrids
             idx = idx.astype(int)
-
+            
             dr = abs(p - grids[idx[:,0],idx[:,1],idx[:,2]])
 
             # check pbc
@@ -171,57 +177,43 @@ class isosurface:
             cond = cond*d
 
             # correct pbc
-            dr = abs(cond*box - dr)
+            dr = cond*box - dr
+            
+            field[idx[:,0],idx[:,1],idx[:,2]] += coarse_grain(dr,sigma)
 
-            self.field[idx[:,0],idx[:,1],idx[:,2]] += coarse_grain(dr,sigma)
+        return field
 
-        return self.field
-
-    def surface1d(self,field1d=None,grids1d=None,c=0.016,direction='yz'):
+    def surface1d(self,field,c=0.016,direction='yz'):
         """
         Function that calculates the points to plot a 1d surface
 
         Args:
-            field1d(np.ndarray): the x field usually (Nx,), if None, then will be calculated from self.field by integrating out y and z dependence (default None)
-            grids1d(np.ndarray): the x grids usually (Nx,), if None, then will generate grids based on self.Nx and self.Lx (default None)
+            field(np.ndarray): field passed in with shape(Nx,Ny,Nz)
             c(float): where the isosurface lie (default 0.016 for water)
             direction(str): which direction to average over (default 'yz', sum over y and z)
 
         Return:
             1.rho1d = numpy array of integrated and averaged density
             2.point = The point where the surface crosses c 
-        """
-        if field1d is None and self.field is None:
-            raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
-        
+        """ 
+        nx,ny,nz = field.shape
+
         if direction == 'yz':
-            n,L = self.nx,self.Lx
+            n,L = nx,self.Lx
+            # sum over y and z
+            field = (self.field.sum(axis=-1)/nz).sum(axis=-1)/ny # (Nx,)
+
         if direction == 'xz':
-            n,L = self.ny,self.Ly
+            n,L = ny,self.Ly
+             # sum over x and z
+            field = (self.field.sum(axis=0)/nx).sum(axis=-1)/nz # (Ny,)
+
         if direction == 'xy':
-            n,L = self.nz,self.Lz
+            n,L = nz,self.Lz
+            # sum over x and y
+            field = (self.field.sum(axis=0)/nx).sum(axis=0)/ny # (Nz,)
 
-        if field1d is not None:
-            field = field1d
-        else:
-            if direction == 'yz':
-                # sum over y and z
-                field = (self.field.sum(axis=-1)/self.nz).sum(axis=-1)/self.ny # (Nx,)
-            if direction == 'xz':
-                # sum over x and z
-                field = (self.field.sum(axis=0)/self.nx).sum(axis=-1)/self.nz # (Ny,)
-            if direction == 'xy': 
-                # sum over x and y
-                field = (self.field.sum(axis=0)/self.nx).sum(axis=0)/self.ny # (Nz,)
-
-        if grids1d is None:
-            grids = np.linspace(0,L,n)
-        else:
-            grids = grids1d
-
-        if len(field.shape) != 1:
-            raise RuntimeError("Please provide a 1d field in the shape of (Nx,)!")
-      
+        grids = np.linspace(0,L,n) 
         pfield = field[0]
         pgrid = grids[0]
         for i in range(1,field.shape[0]):
@@ -241,13 +233,12 @@ class isosurface:
 
         return interface, field
 
-    def surface2d(self,field2d=None,grids2d=None,c=0.016,verbose=False,direction='y'):
+    def surface2d(self,field,c=0.016,verbose=False,direction='y'):
         """
         Function that calculates the on the 2d surface from rho(x,z), similar to marching squares algorithm
 
         Args:
-            fields2d(np.ndarray): the x & z field usually (Nx,Nz), if None, then will use self.field (default None)
-            grids2d(np.ndarray): the x & z grids usually, if None, then will generate grids (default None)
+            field(np.ndarray): The density field (Nx,Ny,Nz)
             c(float): where the isosurface lie (default 0.016)
             verbose(bool): whether to be verbose and print things (default False)
             direction(str): which direction to average over for the 2d surface (default 'y')
@@ -255,41 +246,43 @@ class isosurface:
         Return:    
             A numpy array with points that lies on the 2d isosurface
         """
-        if field2d is None and self.field is None:
-            raise RuntimeError("Please provide a field or run self.field_density_cube or self.density_kdtree!")
-        
-        if field2d is not None:
-            field = field2d
-        else:
-            if direction == 'y':
-                field = self.field.sum(axis=1)/self.ny # (Nx,Nz)
-            if direction == 'x':
-                field = self.field.sum(axis=0)/self.nx # (Ny,Nz)
-            if direction == 'z':
-                field = self.field.sum(axis=-1)/self.nz # (Nx,Ny)
+        nx,ny,nz = field.shape
 
-        if grids2d is None:
-            x = np.linspace(0,self.Lx,self.nx)
-            z = np.linspace(0,self.Lz,self.nz)
+        if direction == 'y':
+            field = field.sum(axis=1)/ny # (Nx,Nz)
+            x1 = np.linspace(0,self.Lx,nx)
+            x2 = np.linspace(0,self.Lz,nz)
 
-            xx,zz = np.meshgrid(x,z)
-            xx = np.moveaxis(xx,0,-1)
-            zz = np.moveaxis(zz,0,-1)
-            grids = np.concatenate((xx[:,:,np.newaxis],zz[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
-        else:
-            grids = grids2d
+            xx1,xx2 = np.meshgrid(x1,x2)
+            grids = np.concatenate((xx1[:,:,np.newaxis],xx2[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
+            N = nx
 
-        if len(field.shape) != 2:
-            raise RuntimeError("Please provide a 2d field in the shape of (Nx,Nz)!")
+        if direction == 'x':
+            field = field.sum(axis=0)/nx # (Ny,Nz)
+            x1 = np.linspace(0,self.Ly,ny)
+            x2 = np.linspace(0,self.Lz,nz)
 
-        Nx,Nz = field.shape
+            xx1,xx2 = np.meshgrid(x1,x2)
+            grids = np.concatenate((xx1[:,:,np.newaxis],xx2[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
+            N = ny
+
+        if direction == 'z':
+            field = field.sum(axis=-1)/nz # (Nx,Ny)
+            x1 = np.linspace(0,self.Lx,nx)
+            x2 = np.linspace(0,self.Ly,ny)
+
+            xx1,xx2 = np.meshgrid(x1,x2)
+            grids = np.concatenate((xx1[:,:,np.newaxis],xx2[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
+            N = nx
+
+
         # define "previous field" as in all the field that has the same x coordinate (in this case x=0)
         pfield = field[0]
         # define "previous grids" as in all the grids that has the same x coordinate (in this case x=0)
         pgrids = grids[0]
         points_all = []
 
-        for i in range(1,Nx):
+        for i in range(1,N):
             # define "current field/grids" as in the current grid/field we are looking at that share the same x coordinate
             cfield = field[i] # (nz, )
             cgrids = grids[i] # (nz,2)
@@ -331,30 +324,19 @@ class isosurface:
         return surface2d
 
  
-    def surface3d(self,c=0.016,gradient_direction='descent',field=None):
+    def surface3d(self,field,c=0.016,gradient_direction='descent'):
         """
         Output the vector positions of the triangles needed for graphing isosurface from marching cubes algorithm 
 
         Args:
+            field(np.ndarray): The density field (Nx,Ny,Nz)
             c(float): the contour line value for the isosurface (default 0.016 for water)
             gradient_direction(str): 'descent' if the values exterior of the object are smaller,
                                 'ascent' if the values exterior of the object are bigger
-            field(np.ndarray): field to be processed, if None, will look for self.field. (default None)
         
         Return: 
                 the indices for all triangles (N,3,3) where N=number of triangles
-        """
-        if self.field is None and field is None:
-            raise RuntimeError("Please run iso.field_density first or pass in a field!")
-
-        if field is not None:
-            field=field
-        else:
-            field =self.field
-        
-
-        Nx,Ny,Nz = self.nx,self.ny,self.nz
-        Lx,Ly,Lz = self.Lx,self.Ly,self.Lz
+        """ 
         dx,dy,dz = self.dx,self.dy,self.dz
 
         verts,faces,_,_ = measure.marching_cubes_lewiner(field,c,spacing=(dx,dy,dz))
@@ -398,3 +380,18 @@ def coarse_grain(dr,sigma):
     sigma2 = np.power(sigma,2)
     
     return np.power(2*np.pi*sigma2,-d/2)*np.exp(-sum_/(2*sigma2))
+
+@njit
+def abs_add_subtract(vec,matrix,sign=1):
+    res = np.empty(matrix.shape,dtype=matrix.dtype)
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            res[i,j] = abs(vec[j] + sign*matrix[i,j])
+    return res
+@njit
+def add_subtract(vec,matrix,sign=1):
+    res = np.empty(matrix.shape,dtype=matrix.dtype)
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            res[i,j] = vec[j] + sign*matrix[i,j]
+    return res
