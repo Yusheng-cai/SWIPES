@@ -103,7 +103,7 @@ class isosurface:
         n = self.n
 
         self.idx = tree.query_ball_point(pos,sigma*n)  
-        self.field = np.zeros((self.nx*self.ny*self.nz,))
+        field = np.zeros((self.nx*self.ny*self.nz,))
 
         ix = 0
         for index in self.idx:
@@ -115,12 +115,12 @@ class isosurface:
 
             # correct pbc
             dr = abs(cond*box - dr)
-            self.field[index] += coarse_grain(dr, sigma)
+            field[index] += coarse_grain(dr, sigma)
             ix += 1                 
 
-        self.field = self.field.reshape(Nx,Ny,Nz)
+        field = field.reshape(Nx,Ny,Nz)
 
-        return self.field
+        return field
 
     def field_density_cube(self,pos,d=np.array([1,1,1])):
         """
@@ -189,17 +189,17 @@ class isosurface:
         if direction == 'yz':
             n,L = nx,self.Lx
             # sum over y and z
-            field = (self.field.sum(axis=-1)/nz).sum(axis=-1)/ny # (Nx,)
+            field = (field.sum(axis=-1)/nz).sum(axis=-1)/ny # (Nx,)
 
         if direction == 'xz':
             n,L = ny,self.Ly
              # sum over x and z
-            field = (self.field.sum(axis=0)/nx).sum(axis=-1)/nz # (Ny,)
+            field = (field.sum(axis=0)/nx).sum(axis=-1)/nz # (Ny,)
 
         if direction == 'xy':
             n,L = nz,self.Lz
             # sum over x and y
-            field = (self.field.sum(axis=0)/nx).sum(axis=0)/ny # (Nz,)
+            field = (field.sum(axis=0)/nx).sum(axis=0)/ny # (Nz,)
 
         grids = np.linspace(0,L,n) 
         pfield = field[0]
@@ -221,7 +221,7 @@ class isosurface:
 
         return interface, field
 
-    def surface2d(self,field,c=0.016,verbose=False,direction='y'):
+    def surface2d(self,field,c=0.016,verbose=False,direction='y',decreasing=True):
         """
         Function that calculates the on the 2d surface from rho(x,z), similar to marching squares algorithm
 
@@ -230,6 +230,7 @@ class isosurface:
             c(float): where the isosurface lie (default 0.016)
             verbose(bool): whether to be verbose and print things (default False)
             direction(str): which direction to average over for the 2d surface (default 'y')
+            decreasing(bool): whether or not the density value is monotonically decreasing over the first axis
 
         Return:    
             A numpy array with points that lies on the 2d isosurface
@@ -242,7 +243,7 @@ class isosurface:
             x2 = np.linspace(0,self.Lz,nz)
 
             xx1,xx2 = np.meshgrid(x1,x2)
-            grids = np.concatenate((xx1[:,:,np.newaxis],xx2[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
+            grids = np.concatenate((xx1.T[:,:,np.newaxis],xx2.T[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
             N = nx
 
         if direction == 'x':
@@ -251,7 +252,7 @@ class isosurface:
             x2 = np.linspace(0,self.Lz,nz)
 
             xx1,xx2 = np.meshgrid(x1,x2)
-            grids = np.concatenate((xx1[:,:,np.newaxis],xx2[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
+            grids = np.concatenate((xx1.T[:,:,np.newaxis],xx2.T[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
             N = ny
 
         if direction == 'z':
@@ -260,7 +261,7 @@ class isosurface:
             x2 = np.linspace(0,self.Ly,ny)
 
             xx1,xx2 = np.meshgrid(x1,x2)
-            grids = np.concatenate((xx1[:,:,np.newaxis],xx2[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
+            grids = np.concatenate((xx1.T[:,:,np.newaxis],xx2.T[:,:,np.newaxis]),axis=-1) # (Nx,Nz,2)
             N = nx
 
 
@@ -275,10 +276,18 @@ class isosurface:
             cfield = field[i] # (n2, )
             cgrids = grids[i] # (n2,2)
             
-            # first condition is the previous x (field) needs to be larger than c
-            cond1 = pfield >= c
-            # second condition is the current x (field) needs to be smaller than c
-            cond2 = cfield <= c
+            if decreasing:
+                # first condition is the previous x (field) needs to be larger than c
+                cond1 = pfield >= c
+                # second condition is the current x (field) needs to be smaller than c
+                cond2 = cfield <= c
+            else:
+                # first condition is the previous x (field) needs to be larger than c
+                cond1 = pfield <= c
+                # second condition is the current x (field) needs to be smaller than c
+                cond2 = cfield >= c
+
+
             # both have to be true in order to be identified to be at the boundary
             cond = cond1*cond2
             # find the indices of the points that satisfy both conditions
