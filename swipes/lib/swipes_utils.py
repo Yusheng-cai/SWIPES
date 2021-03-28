@@ -120,21 +120,24 @@ def write_LJparticle_gro(coords,atom_name='WALL',atom_type='Y',file_path='WALL.g
     f.write("\t{}\t{}\t{}\n".format(Sx,Sy,Sz))
 
 
-def findnumparticles(u,xmin,xmax,ymin,ymax,zmin,zmax,res_name,tmin,tmax,alpha_c=0.02,sigma=0.01,skip=1):
+def findnumparticles(u,res_name,tmin,tmax,xmin=-np.inf,xmax=np.inf,ymin=-np.inf,ymax=np.inf,zmin=-np.inf,zmax=np.inf,alpha_c=0.02,sigma=0.01,skip=1,verbose=False):
     """
     Function that finds the number of particles in a particular probe volume
 
     Args:
         u(mda.Universe): a MDAnalysis Universe object
-        xmin(float): start of x of the probe volume
-        xmax(float): end of x of the probe volume
-        ymin(float): start of y of the probe volume
-        ymax(float): end of y of the probe volume
-        zmin(float): start of z of the probe volume
-        zmax(float): end of z of the probe volume
         tmin(int): start of the time index at which the calculation is performed
         tmax(int): end of the time index at which the calculation is performed
         res_name(string): The residue that we are finding the numbers for
+        xmin(float): start of x of the probe volume (default -np.inf)
+        xmax(float): end of x of the probe volume (default np.inf)
+        ymin(float): start of y of the probe volume (default -np.inf)
+        ymax(float): end of y of the probe volume (default np.inf)
+        zmin(float): start of z of the probe volume (default -np.inf)
+        zmax(float): end of z of the probe volume (default np.inf)
+        alpha_c(float): The alpha_c value in INDUS coarse grain function (cut-off of Gaussian) (default 0.02)
+        sigma(float): The standard deviation of the INDUS coarse grain function (cut-off of Gaussian) (detaul 0.01)
+        skip(int): The number of frames to skip form tmin to tmax (default 1)
 
     Returns:
         num_particles(numpy.ndarray): A numpy array of number of particles per time frame 
@@ -160,6 +163,8 @@ def findnumparticles(u,xmin,xmax,ymin,ymax,zmin,zmax,res_name,tmin,tmax,alpha_c=
 
         num_particles[ix,0] = len(pos)
         num_particles[ix,1] = Ntilde(pos,xmin,xmax,ymin,ymax,zmin,zmax,sigma=sigma,alpha_c=alpha_c)
+        if verbose:
+            print("{} is done".format(t))
         ix += 1
 
     return num_particles
