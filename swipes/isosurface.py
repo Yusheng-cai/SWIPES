@@ -170,6 +170,43 @@ class isosurface:
             field[idx[:,0],idx[:,1],idx[:,2]] += coarse_grain(dr,sigma)
 
         return field
+    
+    def field_density_bin(self,pos,x,y,z):
+        """
+        Function that calculates the field density using binned approach, make into a 3d bin
+
+        Args:
+            pos(numpy.ndarray): A numpy array of shape (N,3) which has all the selected atom positions.
+            Lx(float): The x length of the probe volume
+            Ly(float): The y length of the probe volume
+            Lz(float): The z length of the probe volume
+            x(tuple): The x tuple at which we start and end the binning (xmin,xmax) 
+            y(tuple): The y tuple at which we start and end the binning (ymin,ymax)
+            z(tuple): The z tuple at which we start and end the binning (zmin,zmax)
+
+        Return:
+            field(numpy.ndarray): The field in shape (Nx,Ny,Nz)
+        """ 
+        nx,ny,nz = self.ngrids
+
+        xmin,xmax = x
+        ymin,ymax = y
+        zmin,zmax = z
+
+        pos = pos[pos[:,0] >= xmin]
+        pos = pos[pos[:,0] <= xmax]
+        pos = pos[pos[:,1] >= ymin]
+        pos = pos[pos[:,1] <= ymax]
+        pos = pos[pos[:,2] >= zmin]
+        pos = pos[pos[:,2] <= zmax]
+
+        xrange_ = np.linspace(xmin,xmax,nx+1)
+        yrange_ = np.linspace(ymin,ymax,ny+1)
+        zrange_ = np.linspace(zmin,zmax,nz+1)
+
+        field,edges = np.histogramdd(pos,(xrange_,yrange_,zrange_))
+
+        return field
 
     def surface1d(self,field,c=0.016,direction='yz'):
         """
