@@ -45,6 +45,7 @@ class isosurface:
             self.grids(np.ndarray): the (x,y,z) grids shaped in (Nx,Ny,Nz) 
             
         """
+        ############# weird method to get (X,Y,Z), please search for a better method (more readable) #########
         X = np.linspace(0,self.Lx,num=self.nx,endpoint=False)
         Y = np.linspace(0,self.Ly,num=self.ny,endpoint=False)
         Z = np.linspace(0,self.Lz,num=self.nz,endpoint=False)
@@ -55,7 +56,9 @@ class isosurface:
         xx = np.moveaxis(xx,0,-1)
         yy = np.moveaxis(yy,1,0)
         self.grids = np.vstack((xx.flatten(),yy.flatten(),zz.flatten())).T
+        
 
+        ################################ isosurface kdtree #####################################
         if kdTree:
             self.tree = cKDTree(self.grids,boxsize=self.box)
             if self.verbose:
@@ -63,6 +66,7 @@ class isosurface:
         else:
             self.tree = None
         
+        ################################ isosurface cube #######################################
         # find reference "cube" for field_density_cube
         ref_indices = np.array([0,0,0])
         back = ref_indices - self.nidx_search
@@ -134,12 +138,10 @@ class isosurface:
         by (nx,ny,nz) and add (nx,ny,nz) to all the ones that are smaller than 0.
         
         Args:
-        ----
             pos(np.ndarray): the positions of the atoms (Ntot,3)
             d(np.ndarray): which dimension will not be ignored (numpy array (3,))
 
         Return: 
-        ------
             a field of shape (Nx,Ny,Nz) from ngrids
         """
         box = self.box
