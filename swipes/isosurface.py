@@ -201,12 +201,15 @@ class isosurface:
         pos = pos[pos[:,2] <= zmax]
 
         xrange_ = np.linspace(xmin,xmax,nx+1)
+        dx = xrange_[1] - xrange_[0]
         yrange_ = np.linspace(ymin,ymax,ny+1)
+        dy = yrange_[1] - yrange_[0]
         zrange_ = np.linspace(zmin,zmax,nz+1)
+        dz = zrange_[1] - zrange_[0]
 
         field,edges = np.histogramdd(pos,(xrange_,yrange_,zrange_))
 
-        return field
+        return field/(dx*dy*dz)
 
     def surface1d(self,field,c=0.016,direction='yz'):
         """
