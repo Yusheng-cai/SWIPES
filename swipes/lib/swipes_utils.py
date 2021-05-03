@@ -98,6 +98,96 @@ def cubic_lattice(Sx,Sy,Sz,lattice_spacing):
 
     return coords
 
+def hexagonal_lattice(Nx,Ny,a):
+    """
+    Function that generates coordinates for hexagonal lattices in units of Angstrom
+     
+    Args:
+        Nx(float): Length in the x direction (A)
+        Ny(float): Length in the y direction (A)
+        a(float): Lattice constant for hexagonal lattice (A)
+
+    Return:
+        grids(numpy.ndarray): Concatenated version of xx,yy,zz
+        (xx,yy,zz): Tuple of coordinates for the hexagonal lattice
+    """
+    # Calculate y distance according to lattice constant "a" with ratio sqrt(3)/2
+    disty = np.sqrt(3)/2*a
+    
+    # Create meshgrid for the gold lattice
+    x = np.arange(0,Nx,a)
+    y = np.arange(0,Ny,disty)
+    xx,yy = np.meshgrid(x,y)
+    zz = np.zeros_like(xx)
+
+    # push the x coordinates in to create hexagonal lattice
+    a = float(a)
+    xx[::2,:] += a/2
+    grids = np.concatenate((xx[:,:,np.newaxis],yy[:,:,np.newaxis],zz[:,:,np.newaxis]),axis=-1)
+
+    return (xx,yy,zz),grids
+
+
+def write_SAM_gro(lattice,coords,names,filename='SAM.gro',SAM_name='SAM'):
+    """
+    Function that write SAM molecules to a .gro file
+
+    Args:
+        lattice(numpy.ndarray): The lattice of the sulfur atoms in the SAM molecule (Nx,Ny,3)
+        coords(numpy.ndarray): The coordinates of the top part of the SAM molecules (Nsam,3)
+        names(list): List of strings for the names of the SAM molecules
+        filename(str): The name of the file
+        SAM_name(str): The name of the SAM molecule
+    """
+    lattice = lattice.reshape(-1,3)
+    Sx = np.max(lattice[:,0]+1)/10
+    Sy = np.max(lattice[:,1]+1)/10
+    Sz = 30/10
+    
+    
+    # Want to find mirror image of SAM molecules on the bottom, (a,b,c,d) of the plane
+    plane_rot = np.array([0,0,1,0])
+    n = plane_rot[:-1] # normal vector
+    nlength = (n*n).sum()
+    d = plane_rot[-1]
+
+    t_list = 2/nlength*(d - (n*coords).sum(axis=-1))
+    coords2 = coords + t_list[:,np.newaxis]*n 
+     
+
+    Ngrids = lattice.shape[0]
+    NSam = coords.shape[0]*2 + 1
+    Ntot = Ngrids*NSam
+    
+    c = np.zeros((Ngrids,NSam,3))
+    ix = 0 
+    for g in lattice:
+        c1 = coords + g
+        c2 = coords2 + g
+
+        ll = np.vstack((c1,g,c2))
+        c[ix] = ll
+        ix += 1
+ 
+    first_line = "Simulation of SAM\n"
+    second_line = "{}\n".format(Ntot)
+    gromacs_format = "{0:>5d}{1:<5s}{2:>5s}{3:>5d}{4:>8.3f}{5:>8.3f}{6:>8.3f}\n"
+
+    f = open(filename,'w')
+    f.write(first_line)
+    f.write(second_line)
+    
+    ix = 1
+    for i in range(Ngrids):
+        resid = i + 1
+        for j in range(NSam):
+            idx = i*NSam + (j + 1) 
+            f.write(gromacs_format.format(resid,SAM_name,names[j],idx,c[i,j,0]/10,c[i,j,1]/10,c[i,j,2]/10))
+
+    f.write("\t{}\t{}\t{}\n".format(Sx,Sy,Sz))
+
+
+
 
 def write_LJparticle_gro(coords,atom_name='WALL',atom_type='Y',file_path='WALL.gro'):
     N = len(coords)
@@ -168,3 +258,4 @@ def findnumparticles(u,res_name,tmin,tmax,xmin=-np.inf,xmax=np.inf,ymin=-np.inf,
         ix += 1
 
     return num_particles
+
