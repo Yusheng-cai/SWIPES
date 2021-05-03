@@ -142,7 +142,6 @@ def write_SAM_gro(lattice,coords,names,filename='SAM.gro',SAM_name='SAM'):
     lattice = lattice.reshape(-1,3)
     Sx = np.max(lattice[:,0]+1)/10
     Sy = np.max(lattice[:,1]+1)/10
-    Sz = 30/10
     
     
     # Want to find mirror image of SAM molecules on the bottom, (a,b,c,d) of the plane
@@ -168,6 +167,7 @@ def write_SAM_gro(lattice,coords,names,filename='SAM.gro',SAM_name='SAM'):
         ll = np.vstack((c1,g,c2))
         c[ix] = ll
         ix += 1
+    c[:,:,2] = c[:,:,2] - c[:,:,2].min() + 5
  
     first_line = "Simulation of SAM\n"
     second_line = "{}\n".format(Ntot)
@@ -183,6 +183,7 @@ def write_SAM_gro(lattice,coords,names,filename='SAM.gro',SAM_name='SAM'):
         for j in range(NSam):
             idx = i*NSam + (j + 1) 
             f.write(gromacs_format.format(resid,SAM_name,names[j],idx,c[i,j,0]/10,c[i,j,1]/10,c[i,j,2]/10))
+    Sz = 70/10
 
     f.write("\t{}\t{}\t{}\n".format(Sx,Sy,Sz))
 
